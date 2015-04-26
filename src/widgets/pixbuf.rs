@@ -6,9 +6,9 @@
 
 use glib::to_gboolean;
 use glib::translate::{FromGlibPtr, ToGlibPtr};
+use glib::ffi as glib_ffi;
 use ffi;
-use c_vec::CVec;
-use std::ptr::Unique;
+use std::slice;
 
 #[repr(C)]
 /// This is the main structure in the &gdk-pixbuf; library. It is used to represent images. It contains information about the image's pixel 
@@ -52,14 +52,15 @@ impl Pixbuf {
         unsafe { ffi::gdk_pixbuf_get_bits_per_sample(self.pointer as *const ffi::C_GdkPixbuf) }
     }
 
-    pub fn get_pixels_with_length(&self, length: &mut u32) -> Option<CVec<u8>> {
-        let tmp = unsafe { ffi::gdk_pixbuf_get_pixels_with_length(self.pointer as *const ffi::C_GdkPixbuf, length) };
+    pub fn get_bytes_mut(&self) -> Option<&mut [u8]> {
+        let mut length = 0u32;
+        let tmp = unsafe { ffi::gdk_pixbuf_get_pixels_with_length(self.pointer as *const ffi::C_GdkPixbuf, &mut length) };
 
         unsafe {
             if tmp.is_null() {
                 None
             } else {
-                Some(CVec::new(Unique::new(tmp), *length as usize))
+                Some(slice::from_raw_parts_mut(tmp, length as usize))
             }
         }
     }
@@ -88,25 +89,53 @@ impl Pixbuf {
         }
     }
 
+    /// Return a mutable slice to the RGBA pixels of this `Pixbuf`.
+    ///
+    /// Returns `None` if this Pixbuf does not represent an RGBA image with 8 bits per pixel.
+    pub fn pixels_rgba_mut(&self) -> Option<&mut [(u8, u8, u8, u8)]> {
+        if self.get_n_channels() != 4 || self.get_bits_per_sample() != 8 {
+            // Pixbuf is not RGBA
+            return None;
+        }
+        
+        let mut length = 0u32;
+        let tmp = unsafe { ffi::gdk_pixbuf_get_pixels_with_length(self.pointer as *const ffi::C_GdkPixbuf, &mut length) };
+
+        unsafe {
+            if tmp.is_null() {
+                None
+            } else {
+                Some(slice::from_raw_parts_mut(tmp as *mut (u8, u8, u8, u8), (length / 4) as usize))
+            }
+        }
+    }
+
     /// a convenient function
     /// It won't work for pixbufs with images that are other than 8 bits per sample or channel, but it will work for most of the
     /// pixbufs that GTK+ uses.
+    ///
+    /// ##Panics
+    /// If `(x, y)` is out of bounds of the image.
     pub fn put_pixel(&self, x: i32, y: i32, red: u8, green: u8, blue: u8, alpha: u8) {
-        let n_channels = self.get_n_channels();
         let rowstride = self.get_rowstride();
-        let mut length = 0u32;
-        let pixels = self.get_pixels_with_length(&mut length);
-        if pixels.is_none() {
-            return;
-        }
-        let mut pixels = pixels.unwrap();
-        let s_pixels = pixels.as_mut();
-        let pos = (y * rowstride + x * n_channels) as usize;
 
-        s_pixels[pos] = red;
-        s_pixels[pos + 1] = green;
-        s_pixels[pos + 2] = blue;
-        s_pixels[pos + 3] = alpha;
+        let pixels = match self.pixels_rgba_mut() {
+            Some(bytes) => bytes,
+            None => return,
+        };
+        
+        let pixel = &mut pixels[(y * rowstride + x) as usize];
+
+        pixel.0 = red;
+        pixel.1 = blue;
+        pixel.2 = green;
+        pixel.3 = alpha;
+    }
+}
+
+impl Drop for Pixbuf {
+    fn drop(&mut self) {
+        unsafe { glib_ffi::g_object_unref(self.pointer as *mut glib_ffi::C_GObject); }    
     }
 }
 
