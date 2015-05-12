@@ -26,7 +26,7 @@ libc = "0.1"
 path = "gdk-sys"
 version = "0.1.0"
 
-[dependencies.glib]
+[dependencies.glib-support]
 git = "https://github.com/rust-gnome/glib.git"
 
 [dependencies.glib-sys]
