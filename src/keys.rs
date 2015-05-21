@@ -7,6 +7,7 @@
 use glib::translate::*;
 use ffi;
 use libc::c_uint;
+use std::char;
 
 pub fn keyval_name(keyval: u32) -> Option<String> {
     unsafe {
@@ -17,10 +18,6 @@ pub fn keyval_name(keyval: u32) -> Option<String> {
 pub fn keyval_to_unicode(key: u32) -> Option<char> {
     unsafe {
         let c = char::from_u32(ffi::gdk_keyval_to_unicode(key));
-        if c == Some('\0') {
-            None
-        } else {
-            c
-        }
+        if c == Some('\0') { None } else { c }
     }
 }
