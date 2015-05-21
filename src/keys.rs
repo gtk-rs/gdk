@@ -13,3 +13,14 @@ pub fn keyval_name(keyval: u32) -> Option<String> {
         from_glib_none(ffi::gdk_keyval_name(keyval as c_uint))
     }
 }
+
+pub fn keyval_to_unicode(keyval: u32) -> Option<char> {
+    unsafe {
+        let c = std::char::from_u32(gdk::ffi::gdk_keyval_to_unicode(key));
+        if c == Some('\0') {
+            None
+        } else {
+            c
+        }
+    }
+}
