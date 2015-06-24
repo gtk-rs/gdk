@@ -679,6 +679,8 @@ extern "C" {
     //=========================================================================
     // GdkAppLaunchContext                                               NOT OK
     //=========================================================================
+    pub fn gdk_app_launch_context_new              () -> *mut GdkAppLaunchContext;
+    pub fn gdk_app_launch_context_set_display      (context: *mut GdkAppLaunchContext, display: *mut GdkDisplay);
     pub fn gdk_app_launch_context_set_screen       (context: *mut GdkAppLaunchContext, screen: *mut GdkScreen);
     pub fn gdk_app_launch_context_set_desktop      (context: *mut GdkAppLaunchContext, desktop: c_int);
     pub fn gdk_app_launch_context_set_timestamp    (context: *mut GdkAppLaunchContext, timestamp: u32);
