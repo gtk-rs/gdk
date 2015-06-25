@@ -23,6 +23,7 @@ gdk_3_8 = ["gdk_3_6"]
 gdk_3_10 = ["gdk_3_8"]
 gdk_3_12 = ["gdk_3_10"]
 gdk_3_14 = ["gdk_3_12"]
+gdk_3_16 = ["gdk_3_14"]
 
 [dependencies.glib-sys]
 git  = "https://github.com/rust-gnome/glib"

@@ -341,6 +341,8 @@ extern "C" {
     // GdkDevice                                                         NOT OK
     //=========================================================================
     pub fn gdk_device_get_name             (device: *mut GdkDevice) -> *const c_char;
+    pub fn gdk_device_get_vendor_id        (device: *mut GdkDevice) -> *const c_char;
+    pub fn gdk_device_get_product_id       (device: *mut GdkDevice) -> *const c_char;
     pub fn gdk_device_get_source           (device: *mut GdkDevice) -> enums::InputSource;
     pub fn gdk_device_set_mode             (device: *mut GdkDevice, mode: enums::InputMode);
     pub fn gdk_device_get_mode             (device: *mut GdkDevice) -> enums::InputMode;
@@ -679,6 +681,8 @@ extern "C" {
     //=========================================================================
     // GdkAppLaunchContext                                               NOT OK
     //=========================================================================
+    pub fn gdk_app_launch_context_new              () -> *mut GdkAppLaunchContext;
+    pub fn gdk_app_launch_context_set_display      (context: *mut GdkAppLaunchContext, display: *mut GdkDisplay);
     pub fn gdk_app_launch_context_set_screen       (context: *mut GdkAppLaunchContext, screen: *mut GdkScreen);
     pub fn gdk_app_launch_context_set_desktop      (context: *mut GdkAppLaunchContext, desktop: c_int);
     pub fn gdk_app_launch_context_set_timestamp    (context: *mut GdkAppLaunchContext, timestamp: u32);
