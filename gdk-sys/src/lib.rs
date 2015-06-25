@@ -341,6 +341,8 @@ extern "C" {
     // GdkDevice                                                         NOT OK
     //=========================================================================
     pub fn gdk_device_get_name             (device: *mut GdkDevice) -> *const c_char;
+    pub fn gdk_device_get_vendor_id        (device: *mut GdkDevice) -> *const c_char;
+    pub fn gdk_device_get_product_id       (device: *mut GdkDevice) -> *const c_char;
     pub fn gdk_device_get_source           (device: *mut GdkDevice) -> enums::InputSource;
     pub fn gdk_device_set_mode             (device: *mut GdkDevice, mode: enums::InputMode);
     pub fn gdk_device_get_mode             (device: *mut GdkDevice) -> enums::InputMode;
