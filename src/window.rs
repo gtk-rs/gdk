@@ -1,4 +1,4 @@
-// Copyright 2013-2015, The Rust-GNOME Project Developers.
+// Copyright 2013-2015, The Gtk-rs Project Developers.
 // See the COPYRIGHT file at the top-level directory of this distribution.
 // Licensed under the MIT license, see the LICENSE file or <http://opensource.org/licenses/MIT>
 
@@ -6,21 +6,21 @@
 
 use std::mem;
 use std::ptr;
-use libc::{c_char};
+use libc::{c_char, c_int};
 use glib::translate::*;
 use glib::types;
 use cairo;
 use cursor::Cursor;
 use device::Device;
 use display::Display;
-#[cfg(feature = "gdk_3_8")]
+#[cfg(gdk_3_8)]
 use frame_clock::FrameClock;
 use object::Object;
 use screen::Screen;
 use visual::Visual;
 use ffi;
 
-pub use ffi::enums::{
+use {
     WindowEdge,
     WindowHints,
     WindowState,
@@ -60,16 +60,16 @@ pub struct Attributes {
 }
 
 impl Attributes {
-    fn get_mask(&self) -> i32 {
-        let mut mask = 0;
-        if self.title.is_some() { mask |= ffi::GDK_WA_TITLE; }
-        if self.x.is_some() { mask |= ffi::GDK_WA_X; }
-        if self.y.is_some() { mask |= ffi::GDK_WA_Y; }
-        if self.cursor.is_some() { mask |= ffi::GDK_WA_CURSOR; }
-        if self.visual.is_some() { mask |= ffi::GDK_WA_VISUAL; }
-        if self.override_redirect { mask |= ffi::GDK_WA_NOREDIR; }
-        if self.type_hint.is_some() { mask |= ffi::GDK_WA_TYPE_HINT; }
-        mask
+    fn get_mask(&self) -> u32 {
+        let mut mask = ffi::GdkWindowAttributesType::empty();
+        if self.title.is_some() { mask.insert(ffi::GDK_WA_TITLE); }
+        if self.x.is_some() { mask.insert(ffi::GDK_WA_X); }
+        if self.y.is_some() { mask.insert(ffi::GDK_WA_Y); }
+        if self.cursor.is_some() { mask.insert(ffi::GDK_WA_CURSOR); }
+        if self.visual.is_some() { mask.insert(ffi::GDK_WA_VISUAL); }
+        if self.override_redirect { mask.insert(ffi::GDK_WA_NOREDIR); }
+        if self.type_hint.is_some() { mask.insert(ffi::GDK_WA_TYPE_HINT); }
+        mask.bits()
     }
 }
 
@@ -87,7 +87,7 @@ impl<'a> ToGlibPtr<'a, *mut ffi::GdkWindowAttr> for &'a Attributes {
         let cursor = self.cursor.as_ref().to_glib_none();
 
         let mut attrs = Box::new(ffi::GdkWindowAttr {
-            title: title.0,
+            title: title.0 as *mut c_char,
             event_mask: self.event_mask,
             x: self.x.unwrap_or(0),
             y: self.y.unwrap_or(0),
@@ -97,8 +97,8 @@ impl<'a> ToGlibPtr<'a, *mut ffi::GdkWindowAttr> for &'a Attributes {
             visual: visual.0,
             window_type: self.window_type,
             cursor: cursor.0,
-            wmclass_name: ptr::null(),
-            wmclass_class: ptr::null(),
+            wmclass_name: ptr::null_mut(),
+            wmclass_class: ptr::null_mut(),
             override_redirect: self.override_redirect.to_glib(),
             type_hint: self.type_hint.unwrap_or(WindowTypeHint::Normal),
         });
@@ -119,7 +119,7 @@ impl Window {
             from_glib_full(ffi::gdk_window_new(
                 parent.to_glib_none().0,
                 attributes.to_glib_none().0,
-                attributes.get_mask()))
+                attributes.get_mask() as c_int))
         }
     }
 
@@ -211,12 +211,12 @@ impl Window {
         unsafe { ffi::gdk_window_unfullscreen(self.to_glib_none().0) }
     }
 
-    #[cfg(feature = "gdk_3_8")]
+    #[cfg(gdk_3_8)]
     pub fn get_fullscreen_mode(&self) -> ::FullscreenMode {
         unsafe { ffi::gdk_window_get_fullscreen_mode(self.to_glib_none().0) }
     }
 
-    #[cfg(feature = "gdk_3_8")]
+    #[cfg(gdk_3_8)]
     pub fn set_fullscreen_mode(&self, mode: ::FullscreenMode) {
         unsafe { ffi::gdk_window_set_fullscreen_mode(self.to_glib_none().0, mode) }
     }
@@ -311,23 +311,25 @@ impl Window {
     /* FIXME : I think the Event struct is missing, not just a trait is needed:
     https://developer.gnome.org/gdk3/3.14/gdk3-Event-Structures.html#GdkEvent
 
-    #[cfg(feature = "gdk_3_14")]
+    #[cfg(gdk_3_14)]
     pub fn show_window_menu(&self, event: &::Event) {
         unsafe { ffi::gdk_window_show_window_menu(self.to_glib_none().0, event.to_glib_none().0) }
     }*/
 
+    /* FIXME: the first argument must be *mut GdkGeometry
     pub fn constrain_size(&self, flags: WindowHints, width: i32, height: i32, new_width: &mut i32, new_height: &mut i32) {
         unsafe {
             ffi::gdk_window_constrain_size(self.to_glib_none().0, flags, width, height, new_width,
                 new_height)
         }
     }
+    */
 
     pub fn beep(&self) {
         unsafe { ffi::gdk_window_beep(self.to_glib_none().0) }
     }
 
-    #[cfg(feature = "gdk_3_10")]
+    #[cfg(gdk_3_10)]
     pub fn get_scale_factor(&self) -> i32 {
         unsafe { ffi::gdk_window_get_scale_factor(self.to_glib_none().0) }
     }
@@ -364,7 +366,7 @@ impl Window {
         unsafe { ffi::gdk_window_set_debug_updates(setting.to_glib()) }
     }
 
-    #[cfg(feature = "gdk_3_8")]
+    #[cfg(gdk_3_8)]
     pub fn get_frame_clock(&self) -> FrameClock {
         unsafe { from_glib_none(ffi::gdk_window_get_frame_clock(self.to_glib_none().0)) }
     }
@@ -476,7 +478,7 @@ impl Window {
         unsafe { ffi::gdk_window_get_type_hint(self.to_glib_none().0) }
     }
 
-    #[cfg(feature = "gdk_3_12")]
+    #[cfg(gdk_3_12)]
     pub fn set_shadow_width(&self, left: i32, right: i32, top: i32, bottom: i32) {
         unsafe { ffi::gdk_window_set_shadow_width(self.to_glib_none().0, left, right, top,
             bottom) }
@@ -512,7 +514,7 @@ impl Window {
         }
     }
 
-    pub fn get_origin(&self, x: &mut i32, y: &mut i32) {
+    pub fn get_origin(&self, x: &mut i32, y: &mut i32) -> i32 {
         unsafe { ffi::gdk_window_get_origin(self.to_glib_none().0, x, y) }
     }
 
@@ -530,7 +532,7 @@ impl Window {
         }
     }
 
-    #[cfg(feature = "gdk_3_10")]
+    #[cfg(gdk_3_10)]
     pub fn get_device_position_double(&self, device: &Device, x: &mut f64, y: &mut f64,
         mask: &mut ::ModifierType) -> Option<Window> {
         unsafe {
@@ -654,12 +656,12 @@ impl Window {
         unsafe { ffi::gdk_window_set_source_events(self.to_glib_none().0, source, event_mask) }
     }
 
-    #[cfg(feature = "gdk_3_12")]
+    #[cfg(gdk_3_12)]
     pub fn get_event_compression(&self) -> bool {
         unsafe { from_glib(ffi::gdk_window_get_event_compression(self.to_glib_none().0)) }
     }
 
-    #[cfg(feature = "gdk_3_12")]
+    #[cfg(gdk_3_12)]
     pub fn set_event_compression(&self, event_compression: bool) {
         unsafe {
             ffi::gdk_window_set_event_compression(self.to_glib_none().0,

@@ -1,4 +1,4 @@
-// Copyright 2013-2015, The Rust-GNOME Project Developers.
+// Copyright 2013-2015, The Gtk-rs Project Developers.
 // See the COPYRIGHT file at the top-level directory of this distribution.
 // Licensed under the MIT license, see the LICENSE file or <http://opensource.org/licenses/MIT>
 
@@ -7,14 +7,17 @@
 use std::mem;
 use std::ptr;
 use std::slice;
-use libc::c_uchar;
+use libc::{c_void, c_uchar};
 use glib::translate::*;
 use glib::types::{StaticType, Type};
 use glib::{Error, to_gboolean, GlibContainer};
 use object::Object;
-use ffi;
+use gdk_pixbuf_ffi as ffi;
 
-use {InterpType};
+use {
+    Colorspace,
+    InterpType,
+};
 
 pub mod animation;
 pub mod format;
@@ -34,7 +37,7 @@ impl StaticType for Pixbuf {
 }
 
 impl Pixbuf {
-    pub unsafe fn new(colorspace: ::ColorSpace, has_alpha: bool, bits_per_sample: i32, width: i32,
+    pub unsafe fn new(colorspace: Colorspace, has_alpha: bool, bits_per_sample: i32, width: i32,
             height: i32) -> Result<Pixbuf, ()> {
         Option::from_glib_full(ffi::gdk_pixbuf_new(colorspace, has_alpha.to_glib(),
                                                    bits_per_sample, width, height)).ok_or(())
@@ -43,12 +46,10 @@ impl Pixbuf {
     /// Creates a `Pixbuf` using a `Vec` as image data.
     ///
     /// Only `bits_per_sample == 8` supported.
-    pub fn new_from_vec(mut vec: Vec<u8>, colorspace: ::ColorSpace, has_alpha: bool,
+    pub fn new_from_vec(mut vec: Vec<u8>, colorspace: Colorspace, has_alpha: bool,
             bits_per_sample: i32, width: i32, height: i32, row_stride: i32) -> Pixbuf {
-        extern "C" fn destroy_vec(_: *mut c_uchar, data: ffi::gpointer) {
-            unsafe{
-                let _vec: Box<Vec<u8>> = mem::transmute(data); // the vector will be destroyed now
-            }
+        unsafe extern "C" fn destroy_vec(_: *mut c_uchar, data: *mut c_void) {
+            let _vec: Box<Vec<u8>> = mem::transmute(data); // the vector will be destroyed now
         }
 
         assert!(bits_per_sample == 8);
@@ -60,13 +61,18 @@ impl Pixbuf {
         unsafe {
             from_glib_full(
                 ffi::gdk_pixbuf_new_from_data(ptr, colorspace, has_alpha.to_glib(), bits_per_sample,
-                    width, height, row_stride, destroy_vec, mem::transmute(vec)))
+                    width, height, row_stride, Some(destroy_vec), mem::transmute(vec)))
         }
     }
 
     pub fn new_from_file(filename: &str) -> Result<Pixbuf, Error> {
+        #[cfg(windows)]
+        use gdk_pixbuf_ffi::gdk_pixbuf_new_from_file_utf8 as gdk_pixbuf_new_from_file;
+        #[cfg(not(windows))]
+        use gdk_pixbuf_ffi::gdk_pixbuf_new_from_file;
+
         let mut error = ptr::null_mut();
-        let tmp = unsafe { ffi::gdk_pixbuf_new_from_file(filename.to_glib_none().0, &mut error) };
+        let tmp = unsafe { gdk_pixbuf_new_from_file(filename.to_glib_none().0, &mut error) };
 
         if error.is_null() {
             assert!(!tmp.is_null());
@@ -77,8 +83,16 @@ impl Pixbuf {
     }
 
     pub fn new_from_file_at_size(filename: &str, width: i32, height: i32) -> Result<Pixbuf, Error> {
+        #[cfg(windows)]
+        use gdk_pixbuf_ffi::gdk_pixbuf_new_from_file_at_size_utf8
+            as gdk_pixbuf_new_from_file_at_size;
+        #[cfg(not(windows))]
+        use gdk_pixbuf_ffi::gdk_pixbuf_new_from_file_at_size;
+
         let mut error = ptr::null_mut();
-        let tmp = unsafe { ffi::gdk_pixbuf_new_from_file_at_size(filename.to_glib_none().0, width, height, &mut error) };
+        let tmp = unsafe {
+            gdk_pixbuf_new_from_file_at_size(filename.to_glib_none().0, width, height, &mut error)
+        };
 
         if error.is_null() {
             assert!(!tmp.is_null());
@@ -89,9 +103,17 @@ impl Pixbuf {
     }
 
     pub fn new_from_file_at_scale(filename: &str, width: i32, height: i32, preserve_aspect_ratio: bool) -> Result<Pixbuf, Error> {
+        #[cfg(windows)]
+        use gdk_pixbuf_ffi::gdk_pixbuf_new_from_file_at_scale_utf8
+            as gdk_pixbuf_new_from_file_at_scale;
+        #[cfg(not(windows))]
+        use gdk_pixbuf_ffi::gdk_pixbuf_new_from_file_at_scale;
+
         let mut error = ptr::null_mut();
-        let tmp = unsafe { ffi::gdk_pixbuf_new_from_file_at_scale(filename.to_glib_none().0, width, height,
-            to_gboolean(preserve_aspect_ratio), &mut error) };
+        let tmp = unsafe {
+            gdk_pixbuf_new_from_file_at_scale(filename.to_glib_none().0, width, height,
+                to_gboolean(preserve_aspect_ratio), &mut error)
+        };
 
         if error.is_null() {
             assert!(!tmp.is_null());
@@ -139,7 +161,7 @@ impl Pixbuf {
         }
     }
 
-    pub fn get_colorspace(&self) -> ::ColorSpace {
+    pub fn get_colorspace(&self) -> Colorspace {
         unsafe { ffi::gdk_pixbuf_get_colorspace(self.to_glib_none().0) }
     }
 

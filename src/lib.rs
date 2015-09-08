@@ -1,4 +1,4 @@
-// Copyright 2013-2015, The Rust-GNOME Project Developers.
+// Copyright 2013-2015, The Gtk-rs Project Developers.
 // See the COPYRIGHT file at the top-level directory of this distribution.
 // Licensed under the MIT license, see the LICENSE file or <http://opensource.org/licenses/MIT>
 
@@ -6,8 +6,8 @@
 Bindings and wrappers for __GDK__
 */
 
+extern crate gdk_pixbuf_sys as gdk_pixbuf_ffi;
 extern crate gdk_sys as gdk_ffi;
-extern crate glib_sys as glib_ffi;
 extern crate glib as glib_main;
 extern crate cairo;
 extern crate libc;
@@ -22,6 +22,7 @@ mod rectangle;
 mod rt;
 
 pub mod prelude;
+pub mod enums;
 
 pub mod app_launch_context;
 pub mod atom;
@@ -31,9 +32,9 @@ pub mod device_manager;
 pub mod display;
 pub mod display_manager;
 pub mod drag_context;
-#[cfg(feature = "gdk_3_8")]
+#[cfg(gdk_3_8)]
 pub mod frame_clock;
-#[cfg(feature = "gdk_3_8")]
+#[cfg(gdk_3_8)]
 pub mod frame_timings;
 pub mod pixbuf;
 pub mod rgba;
@@ -61,7 +62,7 @@ pub use self::rt::{
     error_trap_pop,
     error_trap_pop_ignored
 };
-#[cfg(feature = "gdk_3_10")]
+#[cfg(gdk_3_10)]
 pub use self::rt::set_allowed_backends;
 
 pub use app_launch_context::AppLaunchContext;
@@ -72,9 +73,9 @@ pub use device_manager::DeviceManager;
 pub use display::Display;
 pub use display_manager::DisplayManager;
 pub use drag_context::DragContext;
-#[cfg(feature = "gdk_3_8")]
+#[cfg(gdk_3_8)]
 pub use frame_clock::FrameClock;
-#[cfg(feature = "gdk_3_8")]
+#[cfg(gdk_3_8)]
 pub use frame_timings::FrameTimings;
 pub use pixbuf::Pixbuf;
 pub use pixbuf::animation::PixbufAnimation;
@@ -116,33 +117,36 @@ pub use self::events::{
     OwnerChange
 };
 
-pub use gdk_ffi::enums::modifier_intent::ModifierIntent;
-pub use gdk_ffi::enums::modifier_type::ModifierType;
-pub use gdk_ffi::enums::{
-    self,
-    WindowType,
-    WindowState,
-    WindowEdge,
-    WindowHints,
-    WindowTypeHint,
-    FullscreenMode,
-    EventMask,
-    InputSource,
-    InputMode,
-    AxisUse,
-    GrabOwnership,
-    GrabStatus,
-    key,
-    PixbufAlphaMode,
-    PixbufError,
-    ColorSpace,
-    WindowWindowClass,
-    Gravity,
-    DragAction,
-    DragProtocol,
-    InterpType,
-};
+
+pub use gdk_ffi::GdkAxisUse as AxisUse;
+pub use gdk_ffi::GdkDragAction as DragAction;
+pub use gdk_ffi::GdkDragProtocol as DragProtocol;
+pub use gdk_ffi::GdkEventMask as EventMask;
+pub use gdk_ffi::GdkFullscreenMode as FullscreenMode;
+pub use gdk_ffi::GdkGrabOwnership as GrabOwnership;
+pub use gdk_ffi::GdkGrabStatus as GrabStatus;
+pub use gdk_ffi::GdkGravity as Gravity;
+pub use gdk_ffi::GdkInputMode as InputMode;
+pub use gdk_ffi::GdkInputSource as InputSource;
+pub use gdk_ffi::GdkModifierIntent as ModifierIntent;
+pub use gdk_ffi::GdkModifierType as ModifierType;
+pub use gdk_ffi::GdkWMDecoration as WMDecoration;
+pub use gdk_ffi::GdkWMFunction as WMFunction;
+pub use gdk_ffi::GdkWindowEdge as WindowEdge;
+pub use gdk_ffi::GdkWindowHints as WindowHints;
+pub use gdk_ffi::GdkWindowState as WindowState;
+pub use gdk_ffi::GdkWindowType as WindowType;
+pub use gdk_ffi::GdkWindowTypeHint as WindowTypeHint;
+pub use gdk_ffi::GdkWindowWindowClass as WindowWindowClass;
+pub use gdk_pixbuf_ffi::GdkColorspace as Colorspace;
+pub use gdk_pixbuf_ffi::GdkInterpType as InterpType;
+pub use gdk_pixbuf_ffi::GdkPixbufAlphaMode as PixbufAlphaMode;
+pub use gdk_pixbuf_ffi::GdkPixbufError as PixbufError;
+
+#[allow(non_camel_case_types)]
+pub type key = i32;
 
 pub use self::keys::{
-    keyval_name
+    keyval_name,
+    keyval_to_unicode
 };

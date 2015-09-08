@@ -1,4 +1,4 @@
-// Copyright 2013-2015, The Rust-GNOME Project Developers.
+// Copyright 2013-2015, The Gtk-rs Project Developers.
 // See the COPYRIGHT file at the top-level directory of this distribution.
 // Licensed under the MIT license, see the LICENSE file or <http://opensource.org/licenses/MIT>
 
@@ -10,7 +10,7 @@ use glib::{Error, GlibContainer, TimeVal};
 use glib::translate::*;
 use glib::types::{StaticType, Type};
 use object::{Object, Upcast};
-use ffi;
+use gdk_pixbuf_ffi as ffi;
 use super::Pixbuf;
 
 pub type PixbufAnimationIter = Object<ffi::GdkPixbufAnimationIter>;
@@ -51,9 +51,15 @@ impl StaticType for PixbufAnimation {
 
 impl PixbufAnimation {
     pub fn new_from_file(file: &str) -> Result<PixbufAnimation, Error> {
+        #[cfg(windows)]
+        use gdk_pixbuf_ffi::gdk_pixbuf_animation_new_from_file_utf8
+            as gdk_pixbuf_animation_new_from_file;
+        #[cfg(not(windows))]
+        use gdk_pixbuf_ffi::gdk_pixbuf_animation_new_from_file;
+
         unsafe {
             let mut error = ptr::null_mut();
-            let ptr = ffi::gdk_pixbuf_animation_new_from_file(file.to_glib_none().0, &mut error);
+            let ptr = gdk_pixbuf_animation_new_from_file(file.to_glib_none().0, &mut error);
             if error.is_null() {
                 Ok(from_glib_full(ptr))
             } else {
@@ -62,7 +68,7 @@ impl PixbufAnimation {
         }
     }
 
-    #[cfg(feature = "gdk_3_8")] // gdk-pixbuf 2.28
+    #[cfg(gdk_3_8)] // gdk-pixbuf 2.28
     pub fn new_from_resource(resource_path: &str) -> Result<PixbufAnimation, Error> {
         unsafe {
             let mut error = ptr::null_mut();

@@ -1,4 +1,4 @@
-// Copyright 2013-2015, The Rust-GNOME Project Developers.
+// Copyright 2013-2015, The Gtk-rs Project Developers.
 // See the COPYRIGHT file at the top-level directory of this distribution.
 // Licensed under the MIT license, see the LICENSE file or <http://opensource.org/licenses/MIT>
 
@@ -10,7 +10,8 @@ use cairo::RectangleInt;
 use ffi;
 
 pub trait RectangleExt {
-    fn intersect(&self, other: &Self) -> Option<Self>;
+    fn intersect(&self, other: &Self) -> Option<Self>
+        where Self: Sized;
     fn union(&self, other: &Self) -> Self;
 }
 

@@ -1,4 +1,4 @@
-// Copyright 2013-2015, The Rust-GNOME Project Developers.
+// Copyright 2013-2015, The Gtk-rs Project Developers.
 // See the COPYRIGHT file at the top-level directory of this distribution.
 // Licensed under the MIT license, see the LICENSE file or <http://opensource.org/licenses/MIT>
 
@@ -36,7 +36,7 @@ pub fn notify_startup_complete_with_id(startup_id: &str) {
     }
 }
 
-#[cfg(feature = "gdk_3_10")]
+#[cfg(gdk_3_10)]
 pub fn set_allowed_backends(backends: &str) {
     unsafe {
         ffi::gdk_set_allowed_backends(backends.to_glib_none().0)
@@ -83,7 +83,7 @@ pub fn error_trap_push() {
     unsafe { ffi::gdk_error_trap_push() }
 }
 
-pub fn error_trap_pop() {
+pub fn error_trap_pop() -> i32 {
     unsafe { ffi::gdk_error_trap_pop() }
 }
 
