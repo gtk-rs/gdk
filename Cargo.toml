@@ -1,6 +1,6 @@
 [package]
 name = "gdk"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["The Gtk-rs Project Developers"]
 build = "build.rs"
 
@@ -18,8 +18,8 @@ keywords = ["gdk", "gtk", "gtk-rs", "gnome", "GUI"]
 name = "gdk"
 
 [dependencies]
-cairo-rs = { git = "https://github.com/gtk-rs/cairo" }
-gdk-pixbuf-sys = { git = "https://github.com/gtk-rs/sys" }
-gdk-sys = { git = "https://github.com/gtk-rs/sys" }
-glib = { git = "https://github.com/gtk-rs/glib" }
+cairo-rs = "0.0.5"
+gdk-pixbuf-sys = "0.2.0"
+gdk-sys = "0.2.0"
+glib = "0.0.4"
 libc = "0.1"
