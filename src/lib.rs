@@ -137,6 +137,7 @@ pub use gdk_ffi::GdkInputMode as InputMode;
 pub use gdk_ffi::GdkInputSource as InputSource;
 pub use gdk_ffi::GdkModifierIntent as ModifierIntent;
 pub use gdk_ffi::GdkModifierType as ModifierType;
+pub use gdk_ffi::GdkRectangle as Rectangle;
 pub use gdk_ffi::GdkWMDecoration as WMDecoration;
 pub use gdk_ffi::GdkWMFunction as WMFunction;
 pub use gdk_ffi::GdkWindowEdge as WindowEdge;
