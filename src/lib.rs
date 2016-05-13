@@ -100,6 +100,7 @@ pub use display::Display;
 pub use display_manager::DisplayManager;
 pub use drag_context::DragContext;
 pub use event::Event;
+pub use event::Event as EventAny;
 pub use event_button::EventButton;
 pub use event_configure::EventConfigure;
 pub use event_crossing::EventCrossing;
