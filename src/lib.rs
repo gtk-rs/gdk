@@ -66,7 +66,6 @@ mod visual;
 mod window;
 
 pub use ffi::GdkColor as Color;
-pub use ffi::GdkRGBA as RGBA;
 
 pub use self::rt::{
     init,

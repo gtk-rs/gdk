@@ -57,3 +57,13 @@ manual = [
     "Gdk.Attributes",
     "Gdk.Window",
 ]
+
+[[object]]
+name = "Gdk.RGBA"
+status = "generate"
+    [[object.function]]
+    name = "equal"
+    ignore = true
+    [[object.function]]
+    name = "hash"
+    ignore = true
