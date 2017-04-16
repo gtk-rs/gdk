@@ -85,6 +85,7 @@ pub use self::rt::set_allowed_backends;
 pub use atom::Atom;
 pub use atom::NONE as ATOM_NONE;
 pub use event::Event;
+pub use event::Event as EventAny;
 pub use event_button::EventButton;
 pub use event_configure::EventConfigure;
 pub use event_crossing::EventCrossing;
