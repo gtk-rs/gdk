@@ -14,6 +14,6 @@ pub trait DeviceExtManual {
 
 impl<O: IsA<Device>> DeviceExtManual for O {
     fn get_axis(&self, axes: &mut [f64], use_: AxisUse, value: &mut f64) -> bool {
-        unsafe { from_glib(ffi::gdk_device_get_axis(self.to_glib_none().0, axes.as_mut_ptr(), use_.to_glib(), value)) }
+        unsafe { from_glib(ffi::gdk_device_get_axis(self.to_glib_none().0, axes.as_mut_ptr(), use_, value)) }
     }
 }

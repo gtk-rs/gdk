@@ -22,11 +22,11 @@ impl EventCrossing {
     }
 
     pub fn get_mode(&self) -> ::CrossingMode {
-        from_glib(self.as_ref().mode)
+        self.as_ref().mode
     }
 
     pub fn get_detail(&self) -> ::NotifyType {
-        from_glib(self.as_ref().detail)
+        self.as_ref().detail
     }
 
     pub fn get_state(&self) -> ::ModifierType {

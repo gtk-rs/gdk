@@ -74,7 +74,7 @@ impl<O: IsA<DragContext>> DragContextExtManual for O {
                                                  screen.to_glib_none().0,
                                                  x_root, y_root,
                                                  &mut dest_window, &mut protocol);
-            (from_glib_full(dest_window), from_glib(protocol))
+            (from_glib_full(dest_window), protocol)
         }
     }
 
@@ -83,7 +83,7 @@ impl<O: IsA<DragContext>> DragContextExtManual for O {
                        time_: u32) -> bool {
         unsafe {
             from_glib(
-                ffi::gdk_drag_motion(self.to_glib_none().0, dest_window.to_glib_none().0, protocol.to_glib(), 
+                ffi::gdk_drag_motion(self.to_glib_none().0, dest_window.to_glib_none().0, protocol,
                     x_root, y_root, suggested_action.to_glib(), possible_actions.to_glib(), time_))
         }
     }

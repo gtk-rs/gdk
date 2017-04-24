@@ -89,14 +89,14 @@ impl<'a> ToGlibPtr<'a, *mut ffi::GdkWindowAttr> for WindowAttr {
             y: self.y.unwrap_or(0),
             width: self.width,
             height: self.height,
-            wclass: self.wclass.to_glib(),
+            wclass: self.wclass,
             visual: visual.0,
-            window_type: self.window_type.to_glib(),
+            window_type: self.window_type,
             cursor: cursor.0,
             wmclass_name: ptr::null_mut(),
             wmclass_class: ptr::null_mut(),
             override_redirect: self.override_redirect.to_glib(),
-            type_hint: self.type_hint.unwrap_or(WindowTypeHint::Normal).to_glib(),
+            type_hint: self.type_hint.unwrap_or(WindowTypeHint::Normal),
         });
 
         Stash(&mut *attrs, (attrs, visual, cursor, title))
