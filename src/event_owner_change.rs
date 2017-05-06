@@ -16,11 +16,11 @@ impl EventOwnerChange {
     }
 
     pub fn get_reason(&self) -> ::OwnerChange {
-        self.as_ref().reason
+        from_glib(self.as_ref().reason)
     }
 
     pub fn get_selection(&self) -> ::Atom {
-        unsafe { from_glib_none(self.as_ref().selection) }
+        unsafe { from_glib_none(self.as_ref().selection as *mut _) }
     }
 
     pub fn get_time(&self) -> u32 {

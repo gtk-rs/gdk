@@ -19,6 +19,14 @@ impl Atom {
     pub fn name(&self) -> String {
         unsafe { from_glib_full(ffi::gdk_atom_name(self.0)) }
     }
+
+    pub unsafe fn value(&self) -> usize {
+        self.0 as usize
+    }
+}
+
+impl GlibPtrDefault for Atom {
+    type GlibType = ffi::GdkAtom;
 }
 
 impl<'a> ToGlibPtr<'a, ffi::GdkAtom> for Atom {
