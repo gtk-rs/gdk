@@ -74,7 +74,7 @@ impl<O: IsA<DragContext>> DragContextExtManual for O {
                                                  screen.to_glib_none().0,
                                                  x_root, y_root,
                                                  &mut dest_window, &mut protocol);
-            (from_glib_full(dest_window), from_glib(protocol))
+            (from_glib_full(dest_window), protocol)
         }
     }
 
@@ -83,8 +83,8 @@ impl<O: IsA<DragContext>> DragContextExtManual for O {
                        time_: u32) -> bool {
         unsafe {
             from_glib(
-                ffi::gdk_drag_motion(self.to_glib_none().0, dest_window.to_glib_none().0, protocol.to_glib(), 
-                    x_root, y_root, suggested_action.to_glib(), possible_actions.to_glib(), time_))
+                ffi::gdk_drag_motion(self.to_glib_none().0, dest_window.to_glib_none().0, protocol,
+                    x_root, y_root, suggested_action, possible_actions, time_))
         }
     }
 
@@ -93,7 +93,7 @@ impl<O: IsA<DragContext>> DragContextExtManual for O {
     }
 
     fn drag_status(&self, action: DragAction, time_: u32) {
-        unsafe { ffi::gdk_drag_status(self.to_glib_none().0, action.to_glib(), time_) }
+        unsafe { ffi::gdk_drag_status(self.to_glib_none().0, action, time_) }
     }
 
     fn drag_drop_succeeded(&self) -> bool {

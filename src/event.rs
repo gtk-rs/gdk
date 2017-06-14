@@ -21,7 +21,7 @@ glib_wrapper! {
 impl Event {
     /// Returns the event type.
     pub fn get_event_type(&self) -> EventType {
-        from_glib(self.as_ref().type_)
+        self.as_ref().type_
     }
 
     /// Returns the associated `Window` if applicable.
