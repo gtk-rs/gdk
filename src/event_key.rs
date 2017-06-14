@@ -16,7 +16,7 @@ impl EventKey {
     }
 
     pub fn get_state(&self) -> ::ModifierType {
-        from_glib(self.as_ref().state)
+        self.as_ref().state
     }
 
     pub fn get_keyval(&self) -> ::enums::key::Key {

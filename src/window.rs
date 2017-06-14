@@ -145,7 +145,7 @@ impl<O: IsA<Window>> WindowExtManual for O {
     }
 
     fn set_geometry_hints(&self, geometry: &ffi::GdkGeometry, geom_mask: WindowHints) {
-        unsafe { ffi::gdk_window_set_geometry_hints(self.to_glib_none().0, geometry, geom_mask.to_glib()) }
+        unsafe { ffi::gdk_window_set_geometry_hints(self.to_glib_none().0, geometry, geom_mask) }
     }
 
     fn get_default_root_window() -> Window {

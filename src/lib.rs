@@ -13,7 +13,6 @@ extern crate cairo;
 extern crate cairo_sys as cairo_ffi;
 extern crate pango;
 extern crate libc;
-#[macro_use]
 extern crate bitflags;
 
 #[macro_use]
