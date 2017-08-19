@@ -4,6 +4,9 @@
 
 use std::ptr;
 use libc::{c_char, c_int};
+use cairo::{self, Surface};
+use gdk_pixbuf;
+use glib::object::IsA;
 use glib::translate::*;
 use ffi;
 use Cursor;
@@ -66,6 +69,7 @@ impl WindowAttr {
     }
 }
 
+#[cfg_attr(feature = "cargo-clippy", allow(type_complexity))]
 impl<'a> ToGlibPtr<'a, *mut ffi::GdkWindowAttr> for WindowAttr {
     type Storage = (
         Box<ffi::GdkWindowAttr>,
@@ -111,32 +115,73 @@ impl Window {
         }
     }
 
-    pub unsafe fn set_user_data<T>(&self, user_data: &mut T) {
-        ffi::gdk_window_set_user_data(self.to_glib_none().0, ::std::mem::transmute(user_data))
+    pub fn create_similar_surface(&self, content: cairo::Content, width: i32, height: i32) -> Option<Surface> {
+        unsafe {
+            from_glib_full(ffi::gdk_window_create_similar_surface(self.to_glib_none().0, content, width, height))
+        }
+    }
+}
+
+pub trait WindowExtManual {
+    unsafe fn set_user_data<T>(&self, user_data: &mut T);
+
+    #[cfg_attr(feature = "cargo-clippy", allow(mut_from_ref))]
+    unsafe fn get_user_data<T>(&self) -> &mut T;
+
+    fn set_geometry_hints(&self, geometry: &ffi::GdkGeometry, geom_mask: WindowHints);
+
+    fn get_default_root_window() -> Window;
+
+    fn offscreen_window_set_embedder(&self, embedder: &Window);
+
+    fn offscreen_window_get_embedder(&self) -> Option<Window>;
+
+    fn offscreen_window_get_surface(&self) -> Option<Surface>;
+
+    fn get_pixbuf(&self, src_x: i32, src_y: i32, width: i32, height: i32) -> Option<gdk_pixbuf::Pixbuf>;
+}
+
+impl<O: IsA<Window>> WindowExtManual for O {
+    unsafe fn set_user_data<T>(&self, user_data: &mut T) {
+        ffi::gdk_window_set_user_data(self.to_glib_none().0, user_data as *mut T as *mut _)
     }
 
-    pub unsafe fn get_user_data<'a, T>(&'a self) -> &'a mut T {
+    unsafe fn get_user_data<T>(&self) -> &mut T {
         let mut pointer = ::std::ptr::null_mut();
         ffi::gdk_window_get_user_data(self.to_glib_none().0, &mut pointer);
-        ::std::mem::transmute(pointer)
+        &mut *(pointer as *mut T)
     }
 
-    pub fn set_geometry_hints(&self, geometry: &ffi::GdkGeometry, geom_mask: WindowHints) {
+    fn set_geometry_hints(&self, geometry: &ffi::GdkGeometry, geom_mask: WindowHints) {
         unsafe { ffi::gdk_window_set_geometry_hints(self.to_glib_none().0, geometry, geom_mask.to_glib()) }
     }
 
-    pub fn get_default_root_window() -> Window {
+    fn get_default_root_window() -> Window {
         assert_initialized_main_thread!();
         unsafe { from_glib_none(ffi::gdk_get_default_root_window()) }
     }
 
-    pub fn offscreen_window_set_embedder(&self, embedder: &Window) {
+    fn offscreen_window_set_embedder(&self, embedder: &Window) {
         unsafe {
             ffi::gdk_offscreen_window_set_embedder(self.to_glib_none().0, embedder.to_glib_none().0)
         }
     }
 
-    pub fn offscreen_window_get_embedder(&self) -> Option<Window> {
+    fn offscreen_window_get_embedder(&self) -> Option<Window> {
         unsafe { from_glib_none(ffi::gdk_offscreen_window_get_embedder(self.to_glib_none().0)) }
+    }
+
+    fn offscreen_window_get_surface(&self) -> Option<Surface> {
+        skip_assert_initialized!();
+        unsafe {
+            from_glib_none(ffi::gdk_offscreen_window_get_surface(self.to_glib_none().0))
+        }
+    }
+
+    fn get_pixbuf(&self, src_x: i32, src_y: i32, width: i32, height: i32) -> Option<gdk_pixbuf::Pixbuf> {
+        skip_assert_initialized!();
+        unsafe {
+            from_glib_full(ffi::gdk_pixbuf_get_from_window(self.to_glib_none().0, src_x, src_y, width, height))
+        }
     }
 }
