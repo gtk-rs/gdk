@@ -5,11 +5,13 @@
 extern crate glib_sys as glib_ffi;
 extern crate gdk_sys as ffi;
 extern crate gdk_pixbuf;
+extern crate gio;
 #[macro_use]
 extern crate glib;
 extern crate gobject_sys as gobject_ffi;
 extern crate cairo;
 extern crate cairo_sys as cairo_ffi;
+extern crate pango;
 extern crate libc;
 #[macro_use]
 extern crate bitflags;
@@ -19,11 +21,16 @@ mod rt;
 #[macro_use]
 mod event;
 
+#[cfg_attr(feature = "cargo-clippy", allow(transmute_ptr_to_ref))]
+#[cfg_attr(feature = "cargo-clippy", allow(type_complexity))]
+#[cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
 mod auto;
 
 pub mod prelude;
 
+pub use prelude::*;
 pub use auto::*;
+pub use self::auto::functions::*;
 
 pub mod enums;
 
@@ -52,7 +59,9 @@ mod event_visibility;
 mod event_window_state;
 #[cfg(feature = "v3_8")]
 mod frame_clock;
+mod geometry;
 mod keys;
+mod screen;
 mod rectangle;
 mod rgba;
 mod visual;
@@ -64,26 +73,26 @@ pub use glib::Error;
 pub use self::rt::{
     init,
     set_initialized,
-    get_display_arg_name,
-    notify_startup_complete,
-    notify_startup_complete_with_id,
-    get_program_class,
-    set_program_class,
-    flush,
-    screen_width,
-    screen_height,
-    screen_width_mm,
-    screen_height_mm,
-    beep,
-    error_trap_push,
-    error_trap_pop,
-    error_trap_pop_ignored
 };
-#[cfg(feature = "v3_10")]
-pub use self::rt::set_allowed_backends;
 
 pub use atom::Atom;
 pub use atom::NONE as ATOM_NONE;
+pub use atom::SELECTION_PRIMARY;
+pub use atom::SELECTION_SECONDARY;
+pub use atom::SELECTION_CLIPBOARD;
+pub use atom::TARGET_BITMAP;
+pub use atom::TARGET_COLORMAP;
+pub use atom::TARGET_DRAWABLE;
+pub use atom::TARGET_PIXMAP;
+pub use atom::TARGET_STRING;
+pub use atom::SELECTION_TYPE_ATOM;
+pub use atom::SELECTION_TYPE_BITMAP;
+pub use atom::SELECTION_TYPE_COLORMAP;
+pub use atom::SELECTION_TYPE_DRAWABLE;
+pub use atom::SELECTION_TYPE_INTEGER;
+pub use atom::SELECTION_TYPE_PIXMAP;
+pub use atom::SELECTION_TYPE_WINDOW;
+pub use atom::SELECTION_TYPE_STRING;
 pub use event::Event;
 pub use event_button::EventButton;
 pub use event_configure::EventConfigure;
@@ -103,6 +112,7 @@ pub use event_setting::EventSetting;
 pub use event_touch::EventTouch;
 pub use event_visibility::EventVisibility;
 pub use event_window_state::EventWindowState;
+pub use geometry::Geometry;
 pub use rectangle::Rectangle;
 pub use rgba::{RGBA, RgbaParseError};
 pub use window::WindowAttr;
