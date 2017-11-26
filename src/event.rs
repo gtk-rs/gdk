@@ -86,6 +86,13 @@ macro_rules! event_wrapper {
             }
         }
 
+        impl FromGlibPtrBorrow<*mut ::ffi::$ffi_name> for $name {
+            #[inline]
+            unsafe fn from_glib_borrow(ptr: *mut ::ffi::$ffi_name) -> Self {
+                $name(from_glib_borrow(ptr as *mut ::ffi::GdkEvent))
+            }
+        }
+
         impl FromGlibPtrFull<*mut ::ffi::$ffi_name> for $name {
             #[inline]
             unsafe fn from_glib_full(ptr: *mut ::ffi::$ffi_name) -> Self {
@@ -118,12 +125,11 @@ macro_rules! event_wrapper {
 event_wrapper!(Event, GdkEventAny);
 
 macro_rules! event_subtype {
-    ($name:ident, $($ty:ident)|+) => {
+    ($name:ident, $($ty:path)|+) => {
         impl ::event::FromEvent for $name {
             #[inline]
             fn is(ev: &::event::Event) -> bool {
                 skip_assert_initialized!();
-                use ffi::GdkEventType::*;
                 match ev.as_ref().type_ {
                     $($ty)|+ => true,
                     _ => false,
