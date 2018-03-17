@@ -56,7 +56,6 @@ generate = [
 
 manual = [
     "Gdk.Atom",
-    "Gdk.Atom_",
     "Gdk.EventButton",
     "Gdk.EventConfigure",
     "Gdk.EventCrossing",
@@ -264,6 +263,12 @@ status = "generate"
 version = "3.22"
     [[object.property]]
     name = "subpixel-layout"
+    version = "3.22"
+    [[object.property]]
+    name = "manufacturer"
+    version = "3.22"
+    [[object.property]]
+    name = "model"
     version = "3.22"
 
 [[object]]
