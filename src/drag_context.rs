@@ -2,16 +2,16 @@
 // See the COPYRIGHT file at the top-level directory of this distribution.
 // Licensed under the MIT license, see the LICENSE file or <http://opensource.org/licenses/MIT>
 
-use std::ptr;
-use glib::translate::*;
-use glib::object::IsA;
 use atom::Atom;
-use ffi;
 use Device;
 use DragAction;
 use DragContext;
 use DragProtocol;
+use ffi;
+use glib::object::IsA;
+use glib::translate::*;
 use Screen;
+use std::ptr;
 use Window;
 
 pub trait DragContextExtManual {

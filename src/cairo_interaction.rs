@@ -2,11 +2,11 @@
 // See the COPYRIGHT file at the top-level directory of this distribution.
 // Licensed under the MIT license, see the LICENSE file or <http://opensource.org/licenses/MIT>
 
-use glib::translate::*;
+use cairo::Surface;
+use cairo::{Context, Region};
 use ffi;
 use gdk_pixbuf::Pixbuf;
-use cairo::{Context, Region};
-use cairo::Surface;
+use glib::translate::*;
 use {RGBA, Rectangle, Window};
 
 pub trait SurfaceExt {

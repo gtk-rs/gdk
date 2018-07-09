@@ -2,9 +2,9 @@
 // See the COPYRIGHT file at the top-level directory of this distribution.
 // Licensed under the MIT license, see the LICENSE file or <http://opensource.org/licenses/MIT>
 
-use glib::object::IsA;
-use ffi;
 use DeviceManager;
+use ffi;
+use glib::object::IsA;
 
 pub trait DeviceManagerExtManual {
     fn disable_multidevice();

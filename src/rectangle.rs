@@ -5,13 +5,13 @@
 use std::convert::{AsRef, From};
 use std::mem;
 
+use cairo::RectangleInt;
+use ffi;
 use glib;
 use glib::translate::*;
 use glib_ffi;
 use glib_ffi::gconstpointer;
 use gobject_ffi;
-use cairo::RectangleInt;
-use ffi;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 #[repr(C)]

@@ -2,13 +2,13 @@
 // See the COPYRIGHT file at the top-level directory of this distribution.
 // Licensed under the MIT license, see the LICENSE file or <http://opensource.org/licenses/MIT>
 
-use Screen;
-use ffi;
 use cairo;
-
+use ffi;
 use glib;
 use glib::object::IsA;
 use glib::translate::*;
+use Screen;
+
 
 pub trait ScreenExtManual {
     fn get_font_options(&self) -> Option<cairo::FontOptions>;

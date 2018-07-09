@@ -4,8 +4,9 @@
 
 use std::ptr;
 use std::slice;
-use glib::object::IsA;
+
 use ffi;
+use glib::object::IsA;
 use Visual;
 
 pub trait VisualExtManual {

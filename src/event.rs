@@ -2,25 +2,24 @@
 // See the COPYRIGHT file at the top-level directory of this distribution.
 // Licensed under the MIT license, see the LICENSE file or <http://opensource.org/licenses/MIT>
 
-use glib::translate::*;
 use ffi;
-
+use glib::translate::*;
 use glib_ffi;
 use gobject_ffi;
-use std::ptr;
 use std::mem;
+use std::ptr;
 
 use AxisUse;
 use Device;
 #[cfg(any(feature = "v3_22", feature = "dox"))]
 use DeviceTool;
-use EventType;
 use EventSequence;
+use EventType;
 use ModifierType;
+use Screen;
 use ScrollDirection;
 #[cfg(any(feature = "v3_20", feature = "dox"))]
 use Seat;
-use Screen;
 #[cfg(any(feature = "v3_10", feature = "dox"))]
 use Window;
 

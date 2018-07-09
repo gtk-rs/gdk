@@ -2,11 +2,11 @@
 // See the COPYRIGHT file at the top-level directory of this distribution.
 // Licensed under the MIT license, see the LICENSE file or <http://opensource.org/licenses/MIT>
 
-use glib::object::IsA;
-use glib::translate::*;
-use ffi;
 use AxisUse;
 use Device;
+use ffi;
+use glib::object::IsA;
+use glib::translate::*;
 
 pub trait DeviceExtManual {
     fn get_axis(&self, axes: &mut [f64], use_: AxisUse, value: &mut f64) -> bool;

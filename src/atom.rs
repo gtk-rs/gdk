@@ -3,10 +3,10 @@
 // Licensed under the MIT license, see the LICENSE file or <http://opensource.org/licenses/MIT>
 
 use ffi;
-use glib_ffi;
-use std::ptr;
-use std::mem;
 use glib::translate::*;
+use glib_ffi;
+use std::mem;
+use std::ptr;
 
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub struct Atom(ffi::GdkAtom);

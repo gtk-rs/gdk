@@ -2,16 +2,17 @@
 // See the COPYRIGHT file at the top-level directory of this distribution.
 // Licensed under the MIT license, see the LICENSE file or <http://opensource.org/licenses/MIT>
 
-use std::ptr;
-use libc::{c_char, c_int};
 use cairo::{self, PatternTrait, Surface};
+use Cursor;
+use ffi;
 use gdk_pixbuf;
 use glib::object::IsA;
 use glib::translate::*;
-use ffi;
-use Cursor;
 use Visual;
 use Window;
+
+use libc::{c_char, c_int};
+use std::ptr;
 
 use {
     WindowHints,

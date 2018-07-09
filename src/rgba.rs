@@ -7,8 +7,9 @@ use glib;
 use glib::translate::*;
 use glib_ffi::gconstpointer;
 use gobject_ffi;
-use std::hash::{Hash, Hasher};
+
 use std::fmt;
+use std::hash::{Hash, Hasher};
 use std::mem;
 use std::str::FromStr;
 
