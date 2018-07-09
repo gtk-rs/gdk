@@ -8,19 +8,19 @@
 #![cfg_attr(feature = "cargo-clippy", allow(transmute_ptr_to_ptr))]
 #![cfg_attr(feature = "cargo-clippy", allow(trivially_copy_pass_by_ref))]
 
-extern crate glib_sys as glib_ffi;
-extern crate gdk_sys as ffi;
+#[macro_use]
+extern crate bitflags;
+extern crate cairo;
+extern crate cairo_sys as cairo_ffi;
 extern crate gdk_pixbuf;
+extern crate gdk_sys as ffi;
 extern crate gio;
 #[macro_use]
 extern crate glib;
+extern crate glib_sys as glib_ffi;
 extern crate gobject_sys as gobject_ffi;
-extern crate cairo;
-extern crate cairo_sys as cairo_ffi;
-extern crate pango;
 extern crate libc;
-#[macro_use]
-extern crate bitflags;
+extern crate pango;
 
 #[macro_use]
 mod rt;
