@@ -4,41 +4,31 @@
 
 use std::cmp::Ordering;
 
-use utils::read_file;
+use utils::{get_options, read_file};
 
-struct Crate<'a> {
-    name: &'a str,
+struct Crate {
+    name: String,
     options: Vec<usize>,
     pos: usize,
 }
 
-impl<'a> Eq for Crate<'a> {}
-impl<'a> PartialEq for Crate<'a> {
+impl Eq for Crate {}
+impl PartialEq for Crate {
     fn eq(&self, other: &Crate) -> bool {
         self.name == other.name
     }
 }
 
-impl<'a> PartialOrd for Crate<'a> {
+impl PartialOrd for Crate {
     fn partial_cmp(&self, other: &Crate) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl<'a> Ord for Crate<'a> {
+impl Ord for Crate {
     fn cmp(&self, other: &Crate) -> Ordering {
         self.name.cmp(&other.name)
     }
-}
-
-fn get_options(mut pos: usize, lines: &[&str]) -> Vec<usize> {
-    let mut positions = Vec::with_capacity(1);
-
-    while pos > 0 && lines[pos - 1].starts_with("#[") {
-        pos -= 1;
-        positions.push(pos);
-    }
-    positions
 }
 
 #[test]
@@ -53,9 +43,9 @@ fn check_extern_crates() {
             if elems.len() < 3 || elems.get(1) != Some(&"crate") {
                 continue
             }
-            let len = elems[2].len() - 1;
+            let len = elems[2].len() - 1; // to remove ';'
             crates.push(Crate {
-                name: &elems[2][..len],
+                name: elems[2][..len].to_lowercase(),
                 options: get_options(pos, &lines),
                 pos,
             });
@@ -63,12 +53,14 @@ fn check_extern_crates() {
     }
 
     let mut errors = 0;
-    for pos in 0..crates.len() - 1 {
-        if crates[pos] > crates[pos + 1] {
-            println!("ERROR: \"{}\" should be after \"{}\"",
-                     lines[crates[pos].pos],
-                     lines[crates[pos + 1].pos]);
-            errors += 1;
+    if !crates.is_empty() {
+        for pos in 0..crates.len() - 1 {
+            if crates[pos] > crates[pos + 1] {
+                println!("ERROR: \"{}\" should be after \"{}\"",
+                         lines[crates[pos].pos],
+                         lines[crates[pos + 1].pos]);
+                errors += 1;
+            }
         }
     }
     if errors > 0 {
