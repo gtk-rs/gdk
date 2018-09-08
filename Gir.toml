@@ -6,6 +6,7 @@ min_cfg_version = "3.4"
 target_path = "."
 work_mode = "normal"
 generate_safety_asserts = true
+single_version_file = true
 
 generate = [
     "Gdk.AnchorHints",
@@ -16,13 +17,17 @@ generate = [
     "Gdk.CrossingMode",
     "Gdk.CursorType",
     "Gdk.DeviceManager",
+    "Gdk.DevicePad",
+    "Gdk.DevicePadFeature",
     "Gdk.DeviceTool",
     "Gdk.DeviceToolType",
     "Gdk.DeviceType",
     "Gdk.DragAction",
     "Gdk.DragCancelReason",
     "Gdk.DragProtocol",
+    "Gdk.DrawingContext",
     "Gdk.EventMask",
+    "Gdk.EventSequence",
     "Gdk.FrameClockPhase",
     "Gdk.FullscreenMode",
     "Gdk.GLContext",
@@ -37,6 +42,7 @@ generate = [
     "Gdk.NotifyType",
     "Gdk.OwnerChange",
     "Gdk.PropertyState",
+    "Gdk.PropMode",
     "Gdk.ScrollDirection",
     "Gdk.SeatCapabilities",
     "Gdk.SettingAction",
@@ -51,11 +57,18 @@ generate = [
     "Gdk.WindowWindowClass",
     "Gdk.WMDecoration",
     "Gdk.WMFunction",
-    "Gdk.DrawingContext",
 ]
 
 manual = [
+    "cairo.Content",
+    "cairo.Context",
+    "cairo.FontOptions",
+    "cairo.Pattern",
+    "cairo.Region",
+    "cairo.Surface",
     "Gdk.Atom",
+    "Gdk.Event",
+    "Gdk.EventAny",
     "Gdk.EventButton",
     "Gdk.EventConfigure",
     "Gdk.EventCrossing",
@@ -66,27 +79,30 @@ manual = [
     "Gdk.EventKey",
     "Gdk.EventMotion",
     "Gdk.EventOwnerChange",
+    "Gdk.EventPadAxis",
+    "Gdk.EventPadButton",
+    "Gdk.EventPadGroupMode",
     "Gdk.EventProperty",
     "Gdk.EventProximity",
-    "Gdk.Event",
     "Gdk.EventScroll",
     "Gdk.EventSelection",
     "Gdk.EventSetting",
     "Gdk.EventTouch",
+    "Gdk.EventTouchpadPinch",
+    "Gdk.EventTouchpadSwipe",
     "Gdk.EventVisibility",
     "Gdk.EventWindowState",
     "Gdk.Geometry",
     "Gdk.Rectangle",
     "Gdk.RGBA",
-    "cairo.Content",
-    "cairo.Context",
-    "cairo.FontOptions",
-    "cairo.Region",
-    "cairo.Surface",
     "GdkPixbuf.Pixbuf",
+    "Gio.AppLaunchContext",
     "Gio.Icon",
     "GLib.Error",
+    "GObject.Value",
     "Pango.Context",
+    "Pango.Layout",
+    "Pango.LayoutLine",
 ]
 
 [[object]]
@@ -100,6 +116,17 @@ status = "generate"
         [[object.function.parameter]]
         name = "surface"
         const = true
+    [[object.function]]
+    name = "setting_get"
+    # GValue initialized inside the function instead of passed as argument
+    ignore = true
+    [[object.function]]
+    name = "property_change"
+    # data parameter needed to be more
+    ignore = true
+    [[object.function]]
+    name = "pango_layout_get_clip_region"
+    ignore = true
     [[object.function]]
     name = "selection_property_get"
     #data
@@ -156,25 +183,6 @@ status = "generate"
     name = "init"
     #manual
     ignore = true
-
-[[object]]
-name = "Gdk.EventType"
-status = "generate"
-    [[object.member]]
-    name = "2button_press"
-    alias = true
-    [[object.member]]
-    name = "3button_press"
-    alias = true
-    [[object.member]]
-    name = "touchpad_swipe"
-    version = "3.18"
-    [[object.member]]
-    name = "touchpad_pinch"
-    version = "3.18"
-    [[object.member]]
-    name = "event_last"
-    alias = true
 
 [[object]]
 name = "Gdk.Cursor"
@@ -245,6 +253,25 @@ status = "generate"
         nullable = false
 
 [[object]]
+name = "Gdk.EventType"
+status = "generate"
+    [[object.member]]
+    name = "2button_press"
+    alias = true
+    [[object.member]]
+    name = "3button_press"
+    alias = true
+    [[object.member]]
+    name = "touchpad_swipe"
+    version = "3.18"
+    [[object.member]]
+    name = "touchpad_pinch"
+    version = "3.18"
+    [[object.member]]
+    name = "event_last"
+    alias = true
+
+[[object]]
 name = "Gdk.FrameClock"
 status = "generate"
     [[object.function]]
@@ -312,6 +339,9 @@ name = "Gdk.Window"
 status = "generate"
     [[object.function]]
     name = "new"
+    ignore = true
+    [[object.function]]
+    pattern = "[gs]et_background_pattern"
     ignore = true
     [[object.function]]
     name = "get_effective_toplevel"
