@@ -5,7 +5,7 @@
 use glib::translate::*;
 use ffi;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct EventScroll(::Event);
 
 event_wrapper!(EventScroll, GdkEventScroll);
@@ -45,4 +45,9 @@ impl EventScroll {
         let dy = self.as_ref().delta_y;
         (dx, dy)
     }
+
+    // TODO: to be uncommented when the field will be generated
+    // pub fn get_is_stop(&self) -> bool {
+    //     from_glib(self.as_ref().is_stop)
+    // }
 }

@@ -5,7 +5,7 @@
 use glib::translate::*;
 use ffi;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct EventKey(::Event);
 
 event_wrapper!(EventKey, GdkEventKey);
@@ -38,5 +38,8 @@ impl EventKey {
         self.as_ref().group
     }
 
-    // TODO: add getter for is_modifier
+    // TODO: to be uncommented when the field will be generated
+    // pub fn get_is_modifier(&self) -> bool {
+    //     from_glib(self.as_ref().is_modifier)
+    // }
 }

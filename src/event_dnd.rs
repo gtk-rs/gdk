@@ -5,7 +5,7 @@
 use glib::translate::*;
 use ffi;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct EventDND(::Event);
 
 event_wrapper!(EventDND, GdkEventDND);
@@ -18,5 +18,11 @@ impl EventDND {
 
     pub fn get_time(&self) -> u32 {
         self.as_ref().time
+    }
+
+    pub fn get_root(&self) -> (i16, i16) {
+        let x_root = self.as_ref().x_root;
+        let y_root = self.as_ref().y_root;
+        (x_root, y_root)
     }
 }
