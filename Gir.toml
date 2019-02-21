@@ -2,11 +2,12 @@
 girs_dir = "gir-files"
 library = "Gdk"
 version = "3.0"
-min_cfg_version = "3.4"
+min_cfg_version = "3.14"
 target_path = "."
 work_mode = "normal"
 generate_safety_asserts = true
 single_version_file = true
+deprecate_by_min_version = true
 
 generate = [
     "Gdk.AnchorHints",
@@ -207,6 +208,9 @@ status = "generate"
     [[object.property]]
     name = "tool"
     version = "3.22"
+    [[object.property]]
+    name = "type"
+    generate = ["get", "notify"]
 
 [[object]]
 name = "Gdk.Display"
@@ -283,6 +287,18 @@ status = "generate"
 name = "Gdk.FrameTimings"
 status = "generate"
 version = "3.8"
+    [[object.function]]
+    name = "get_predicted_presentation_time"
+    # Use an `Option` for the return value
+    ignore = true
+    [[object.function]]
+    name = "get_presentation_time"
+    # Use an `Option` for the return value
+    ignore = true
+    [[object.function]]
+    name = "get_refresh_interval"
+    # Use an `Option` for the return value
+    ignore = true
 
 [[object]]
 name = "Gdk.Monitor"
@@ -312,6 +328,10 @@ status = "generate"
     [[object.function]]
     name = "get_font_options"
     ignore = true
+    [[object.function]]
+    name = "get_setting"
+    # bool return value signals success
+    ignore = true
 
 [[object]]
 name = "Gdk.Seat"
@@ -337,6 +357,7 @@ status = "generate"
 [[object]]
 name = "Gdk.Window"
 status = "generate"
+manual_traits = ["WindowExtManual"]
     [[object.function]]
     name = "new"
     ignore = true

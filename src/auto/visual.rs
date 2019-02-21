@@ -6,15 +6,12 @@ use ByteOrder;
 use Screen;
 use VisualType;
 use ffi;
-use glib::object::IsA;
 use glib::translate::*;
-use glib_ffi;
-use gobject_ffi;
+use std::fmt;
 use std::mem;
-use std::ptr;
 
 glib_wrapper! {
-    pub struct Visual(Object<ffi::GdkVisual>);
+    pub struct Visual(Object<ffi::GdkVisual, VisualClass>);
 
     match fn {
         get_type => || ffi::gdk_visual_get_type(),
@@ -22,6 +19,75 @@ glib_wrapper! {
 }
 
 impl Visual {
+    #[cfg_attr(feature = "v3_22", deprecated)]
+    pub fn get_bits_per_rgb(&self) -> i32 {
+        unsafe {
+            ffi::gdk_visual_get_bits_per_rgb(self.to_glib_none().0)
+        }
+    }
+
+    pub fn get_blue_pixel_details(&self) -> (u32, i32, i32) {
+        unsafe {
+            let mut mask = mem::uninitialized();
+            let mut shift = mem::uninitialized();
+            let mut precision = mem::uninitialized();
+            ffi::gdk_visual_get_blue_pixel_details(self.to_glib_none().0, &mut mask, &mut shift, &mut precision);
+            (mask, shift, precision)
+        }
+    }
+
+    #[cfg_attr(feature = "v3_22", deprecated)]
+    pub fn get_byte_order(&self) -> ByteOrder {
+        unsafe {
+            from_glib(ffi::gdk_visual_get_byte_order(self.to_glib_none().0))
+        }
+    }
+
+    #[cfg_attr(feature = "v3_22", deprecated)]
+    pub fn get_colormap_size(&self) -> i32 {
+        unsafe {
+            ffi::gdk_visual_get_colormap_size(self.to_glib_none().0)
+        }
+    }
+
+    pub fn get_depth(&self) -> i32 {
+        unsafe {
+            ffi::gdk_visual_get_depth(self.to_glib_none().0)
+        }
+    }
+
+    pub fn get_green_pixel_details(&self) -> (u32, i32, i32) {
+        unsafe {
+            let mut mask = mem::uninitialized();
+            let mut shift = mem::uninitialized();
+            let mut precision = mem::uninitialized();
+            ffi::gdk_visual_get_green_pixel_details(self.to_glib_none().0, &mut mask, &mut shift, &mut precision);
+            (mask, shift, precision)
+        }
+    }
+
+    pub fn get_red_pixel_details(&self) -> (u32, i32, i32) {
+        unsafe {
+            let mut mask = mem::uninitialized();
+            let mut shift = mem::uninitialized();
+            let mut precision = mem::uninitialized();
+            ffi::gdk_visual_get_red_pixel_details(self.to_glib_none().0, &mut mask, &mut shift, &mut precision);
+            (mask, shift, precision)
+        }
+    }
+
+    pub fn get_screen(&self) -> Screen {
+        unsafe {
+            from_glib_none(ffi::gdk_visual_get_screen(self.to_glib_none().0))
+        }
+    }
+
+    pub fn get_visual_type(&self) -> VisualType {
+        unsafe {
+            from_glib(ffi::gdk_visual_get_visual_type(self.to_glib_none().0))
+        }
+    }
+
     #[cfg_attr(feature = "v3_22", deprecated)]
     pub fn get_best() -> Visual {
         assert_initialized_main_thread!();
@@ -79,93 +145,8 @@ impl Visual {
     }
 }
 
-pub trait VisualExt {
-    #[cfg_attr(feature = "v3_22", deprecated)]
-    fn get_bits_per_rgb(&self) -> i32;
-
-    fn get_blue_pixel_details(&self) -> (u32, i32, i32);
-
-    #[cfg_attr(feature = "v3_22", deprecated)]
-    fn get_byte_order(&self) -> ByteOrder;
-
-    #[cfg_attr(feature = "v3_22", deprecated)]
-    fn get_colormap_size(&self) -> i32;
-
-    fn get_depth(&self) -> i32;
-
-    fn get_green_pixel_details(&self) -> (u32, i32, i32);
-
-    fn get_red_pixel_details(&self) -> (u32, i32, i32);
-
-    fn get_screen(&self) -> Screen;
-
-    fn get_visual_type(&self) -> VisualType;
-}
-
-impl<O: IsA<Visual>> VisualExt for O {
-    fn get_bits_per_rgb(&self) -> i32 {
-        unsafe {
-            ffi::gdk_visual_get_bits_per_rgb(self.to_glib_none().0)
-        }
-    }
-
-    fn get_blue_pixel_details(&self) -> (u32, i32, i32) {
-        unsafe {
-            let mut mask = mem::uninitialized();
-            let mut shift = mem::uninitialized();
-            let mut precision = mem::uninitialized();
-            ffi::gdk_visual_get_blue_pixel_details(self.to_glib_none().0, &mut mask, &mut shift, &mut precision);
-            (mask, shift, precision)
-        }
-    }
-
-    fn get_byte_order(&self) -> ByteOrder {
-        unsafe {
-            from_glib(ffi::gdk_visual_get_byte_order(self.to_glib_none().0))
-        }
-    }
-
-    fn get_colormap_size(&self) -> i32 {
-        unsafe {
-            ffi::gdk_visual_get_colormap_size(self.to_glib_none().0)
-        }
-    }
-
-    fn get_depth(&self) -> i32 {
-        unsafe {
-            ffi::gdk_visual_get_depth(self.to_glib_none().0)
-        }
-    }
-
-    fn get_green_pixel_details(&self) -> (u32, i32, i32) {
-        unsafe {
-            let mut mask = mem::uninitialized();
-            let mut shift = mem::uninitialized();
-            let mut precision = mem::uninitialized();
-            ffi::gdk_visual_get_green_pixel_details(self.to_glib_none().0, &mut mask, &mut shift, &mut precision);
-            (mask, shift, precision)
-        }
-    }
-
-    fn get_red_pixel_details(&self) -> (u32, i32, i32) {
-        unsafe {
-            let mut mask = mem::uninitialized();
-            let mut shift = mem::uninitialized();
-            let mut precision = mem::uninitialized();
-            ffi::gdk_visual_get_red_pixel_details(self.to_glib_none().0, &mut mask, &mut shift, &mut precision);
-            (mask, shift, precision)
-        }
-    }
-
-    fn get_screen(&self) -> Screen {
-        unsafe {
-            from_glib_none(ffi::gdk_visual_get_screen(self.to_glib_none().0))
-        }
-    }
-
-    fn get_visual_type(&self) -> VisualType {
-        unsafe {
-            from_glib(ffi::gdk_visual_get_visual_type(self.to_glib_none().0))
-        }
+impl fmt::Display for Visual {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Visual")
     }
 }

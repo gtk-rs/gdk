@@ -3,6 +3,7 @@
 // Licensed under the MIT license, see the LICENSE file or <http://opensource.org/licenses/MIT>
 
 use ffi;
+use glib::GString;
 use glib_ffi;
 use std::ptr;
 use std::mem;
@@ -35,7 +36,7 @@ impl Atom {
         unsafe { Atom(ffi::gdk_atom_intern(atom_name.to_glib_none().0, false.to_glib())) }
     }
 
-    pub fn name(self) -> String {
+    pub fn name(self) -> GString {
         unsafe { from_glib_full(ffi::gdk_atom_name(self.0)) }
     }
 
@@ -93,7 +94,7 @@ impl<'a> ToGlibContainerFromSlice<'a, *mut ffi::GdkAtom> for &'a Atom {
         let v: Vec<_> = t.iter().map(|s| s.to_glib_none()).collect();
 
         let v_ptr = unsafe {
-            let v_ptr = glib_ffi::g_malloc0(mem::size_of::<ffi::GdkAtom>() * t.len() + 1) as *mut ffi::GdkAtom;
+            let v_ptr = glib_ffi::g_malloc0(mem::size_of::<ffi::GdkAtom>() * (t.len() + 1)) as *mut ffi::GdkAtom;
 
             for (i, s) in v.iter().enumerate() {
                 ptr::write(v_ptr.offset(i as isize), s.0);
@@ -112,9 +113,52 @@ impl<'a> ToGlibContainerFromSlice<'a, *mut ffi::GdkAtom> for &'a Atom {
     }
 }
 
+impl<'a> ToGlibContainerFromSlice<'a, *const ffi::GdkAtom> for &'a Atom {
+    type Storage = (Vec<Stash<'a, ffi::GdkAtom, &'a Atom>>, Option<Vec<ffi::GdkAtom>>);
+
+    fn to_glib_none_from_slice(t: &'a [&'a Atom]) -> (*const ffi::GdkAtom, Self::Storage) {
+        skip_assert_initialized!();
+
+        let v: Vec<_> = t.iter().map(|s| s.to_glib_none()).collect();
+        let mut v_ptr: Vec<_> = v.iter().map(|s| s.0).collect();
+        v_ptr.push(ptr::null_mut());
+
+        (v_ptr.as_ptr() as *const ffi::GdkAtom, (v, Some(v_ptr)))
+    }
+
+    fn to_glib_container_from_slice(t: &'a [&'a Atom]) -> (*const ffi::GdkAtom, Self::Storage) {
+        skip_assert_initialized!();
+
+        let v: Vec<_> = t.iter().map(|s| s.to_glib_none()).collect();
+
+        let v_ptr = unsafe {
+            let v_ptr = glib_ffi::g_malloc0(mem::size_of::<ffi::GdkAtom>() * (t.len() + 1)) as *mut ffi::GdkAtom;
+
+            for (i, s) in v.iter().enumerate() {
+                ptr::write(v_ptr.offset(i as isize), s.0);
+            }
+
+            v_ptr as *const ffi::GdkAtom
+        };
+
+        (v_ptr, (v, None))
+    }
+
+    fn to_glib_full_from_slice(_: &[&'a Atom]) -> *const ffi::GdkAtom {
+        skip_assert_initialized!();
+
+        unimplemented!()
+    }
+}
+
 impl FromGlibPtrNone<ffi::GdkAtom> for Atom {
     #[inline]
     unsafe fn from_glib_none(ptr: ffi::GdkAtom) -> Atom { Atom(ptr) }
+}
+
+impl FromGlibPtrBorrow<ffi::GdkAtom> for Atom {
+    #[inline]
+    unsafe fn from_glib_borrow(ptr: ffi::GdkAtom) -> Atom { Atom(ptr) }
 }
 
 impl FromGlibPtrFull<ffi::GdkAtom> for Atom {
