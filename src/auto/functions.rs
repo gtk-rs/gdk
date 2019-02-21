@@ -3,12 +3,9 @@
 // DO NOT EDIT
 
 use Atom;
-use Cursor;
 use Display;
 use Event;
-use EventMask;
 use EventType;
-use GrabStatus;
 use ModifierType;
 use Screen;
 use Visual;
@@ -17,6 +14,8 @@ use WindowState;
 use cairo;
 use ffi;
 use gdk_pixbuf;
+use glib::GString;
+use glib::object::IsA;
 use glib::translate::*;
 use libc;
 use pango;
@@ -99,22 +98,14 @@ pub fn flush() {
     }
 }
 
-#[cfg_attr(feature = "v3_8", deprecated)]
-pub fn get_display() -> Option<String> {
-    assert_initialized_main_thread!();
-    unsafe {
-        from_glib_full(ffi::gdk_get_display())
-    }
-}
-
-pub fn get_display_arg_name() -> Option<String> {
+pub fn get_display_arg_name() -> Option<GString> {
     assert_initialized_main_thread!();
     unsafe {
         from_glib_none(ffi::gdk_get_display_arg_name())
     }
 }
 
-pub fn get_program_class() -> Option<String> {
+pub fn get_program_class() -> Option<GString> {
     assert_initialized_main_thread!();
     unsafe {
         from_glib_none(ffi::gdk_get_program_class())
@@ -128,25 +119,9 @@ pub fn get_show_events() -> bool {
     }
 }
 
-//pub fn init_check(argv: /*Unimplemented*/Vec<String>) -> bool {
+//pub fn init_check(argv: /*Unimplemented*/Vec<GString>) -> bool {
 //    unsafe { TODO: call ffi::gdk_init_check() }
 //}
-
-#[deprecated]
-pub fn keyboard_grab(window: &Window, owner_events: bool, time_: u32) -> GrabStatus {
-    skip_assert_initialized!();
-    unsafe {
-        from_glib(ffi::gdk_keyboard_grab(window.to_glib_none().0, owner_events.to_glib(), time_))
-    }
-}
-
-#[deprecated]
-pub fn keyboard_ungrab(time_: u32) {
-    assert_initialized_main_thread!();
-    unsafe {
-        ffi::gdk_keyboard_ungrab(time_);
-    }
-}
 
 pub fn keyval_convert_case(symbol: u32) -> (u32, u32) {
     assert_initialized_main_thread!();
@@ -241,7 +216,7 @@ pub fn pango_context_get_for_screen(screen: &Screen) -> Option<pango::Context> {
 //    unsafe { TODO: call ffi::gdk_pango_layout_line_get_clip_region() }
 //}
 
-//pub fn parse_args(argv: /*Unimplemented*/Vec<String>) {
+//pub fn parse_args(argv: /*Unimplemented*/Vec<GString>) {
 //    unsafe { TODO: call ffi::gdk_parse_args() }
 //}
 
@@ -249,34 +224,6 @@ pub fn pixbuf_get_from_surface(surface: &cairo::Surface, src_x: i32, src_y: i32,
     assert_initialized_main_thread!();
     unsafe {
         from_glib_full(ffi::gdk_pixbuf_get_from_surface(mut_override(surface.to_glib_none().0), src_x, src_y, width, height))
-    }
-}
-
-#[deprecated]
-pub fn pointer_grab<'a, 'b, P: Into<Option<&'a Window>>, Q: Into<Option<&'b Cursor>>>(window: &Window, owner_events: bool, event_mask: EventMask, confine_to: P, cursor: Q, time_: u32) -> GrabStatus {
-    skip_assert_initialized!();
-    let confine_to = confine_to.into();
-    let confine_to = confine_to.to_glib_none();
-    let cursor = cursor.into();
-    let cursor = cursor.to_glib_none();
-    unsafe {
-        from_glib(ffi::gdk_pointer_grab(window.to_glib_none().0, owner_events.to_glib(), event_mask.to_glib(), confine_to.0, cursor.0, time_))
-    }
-}
-
-#[deprecated]
-pub fn pointer_is_grabbed() -> bool {
-    assert_initialized_main_thread!();
-    unsafe {
-        from_glib(ffi::gdk_pointer_is_grabbed())
-    }
-}
-
-#[deprecated]
-pub fn pointer_ungrab(time_: u32) {
-    assert_initialized_main_thread!();
-    unsafe {
-        ffi::gdk_pointer_ungrab(time_);
     }
 }
 
@@ -288,21 +235,21 @@ pub fn pre_parse_libgtk_only() {
     }
 }
 
-pub fn property_delete(window: &Window, property: &Atom) {
+pub fn property_delete<P: IsA<Window>>(window: &P, property: &Atom) {
     skip_assert_initialized!();
     unsafe {
-        ffi::gdk_property_delete(window.to_glib_none().0, property.to_glib_none().0);
+        ffi::gdk_property_delete(window.as_ref().to_glib_none().0, property.to_glib_none().0);
     }
 }
 
-pub fn property_get(window: &Window, property: &Atom, type_: &Atom, offset: libc::c_ulong, length: libc::c_ulong, pdelete: i32) -> Option<(Atom, i32, Vec<u8>)> {
+pub fn property_get<P: IsA<Window>>(window: &P, property: &Atom, type_: &Atom, offset: libc::c_ulong, length: libc::c_ulong, pdelete: i32) -> Option<(Atom, i32, Vec<u8>)> {
     skip_assert_initialized!();
     unsafe {
         let mut actual_property_type = Atom::uninitialized();
         let mut actual_format = mem::uninitialized();
         let mut actual_length = mem::uninitialized();
         let mut data = ptr::null_mut();
-        let ret = from_glib(ffi::gdk_property_get(window.to_glib_none().0, property.to_glib_none().0, type_.to_glib_none().0, offset, length, pdelete, actual_property_type.to_glib_none_mut().0, &mut actual_format, &mut actual_length, &mut data));
+        let ret = from_glib(ffi::gdk_property_get(window.as_ref().to_glib_none().0, property.to_glib_none().0, type_.to_glib_none().0, offset, length, pdelete, actual_property_type.to_glib_none_mut().0, &mut actual_format, &mut actual_length, &mut data));
         if ret { Some((actual_property_type, actual_format, FromGlibContainer::from_glib_full_num(data, actual_length as usize))) } else { None }
     }
 }
@@ -323,10 +270,10 @@ pub fn query_depths() -> Vec<i32> {
 //    unsafe { TODO: call ffi::gdk_query_visual_types() }
 //}
 
-pub fn selection_convert(requestor: &Window, selection: &Atom, target: &Atom, time_: u32) {
+pub fn selection_convert<P: IsA<Window>>(requestor: &P, selection: &Atom, target: &Atom, time_: u32) {
     skip_assert_initialized!();
     unsafe {
-        ffi::gdk_selection_convert(requestor.to_glib_none().0, selection.to_glib_none().0, target.to_glib_none().0, time_);
+        ffi::gdk_selection_convert(requestor.as_ref().to_glib_none().0, selection.to_glib_none().0, target.to_glib_none().0, time_);
     }
 }
 
@@ -344,39 +291,36 @@ pub fn selection_owner_get_for_display(display: &Display, selection: &Atom) -> O
     }
 }
 
-pub fn selection_owner_set<'a, P: Into<Option<&'a Window>>>(owner: P, selection: &Atom, time_: u32, send_event: bool) -> bool {
+pub fn selection_owner_set<'a, P: IsA<Window> + 'a, Q: Into<Option<&'a P>>>(owner: Q, selection: &Atom, time_: u32, send_event: bool) -> bool {
     assert_initialized_main_thread!();
     let owner = owner.into();
-    let owner = owner.to_glib_none();
     unsafe {
-        from_glib(ffi::gdk_selection_owner_set(owner.0, selection.to_glib_none().0, time_, send_event.to_glib()))
+        from_glib(ffi::gdk_selection_owner_set(owner.map(|p| p.as_ref()).to_glib_none().0, selection.to_glib_none().0, time_, send_event.to_glib()))
     }
 }
 
-pub fn selection_owner_set_for_display<'a, P: Into<Option<&'a Window>>>(display: &Display, owner: P, selection: &Atom, time_: u32, send_event: bool) -> bool {
+pub fn selection_owner_set_for_display<'a, P: IsA<Window> + 'a, Q: Into<Option<&'a P>>>(display: &Display, owner: Q, selection: &Atom, time_: u32, send_event: bool) -> bool {
     skip_assert_initialized!();
     let owner = owner.into();
-    let owner = owner.to_glib_none();
     unsafe {
-        from_glib(ffi::gdk_selection_owner_set_for_display(display.to_glib_none().0, owner.0, selection.to_glib_none().0, time_, send_event.to_glib()))
+        from_glib(ffi::gdk_selection_owner_set_for_display(display.to_glib_none().0, owner.map(|p| p.as_ref()).to_glib_none().0, selection.to_glib_none().0, time_, send_event.to_glib()))
     }
 }
 
-pub fn selection_send_notify(requestor: &Window, selection: &Atom, target: &Atom, property: &Atom, time_: u32) {
+pub fn selection_send_notify<P: IsA<Window>>(requestor: &P, selection: &Atom, target: &Atom, property: &Atom, time_: u32) {
     skip_assert_initialized!();
     unsafe {
-        ffi::gdk_selection_send_notify(requestor.to_glib_none().0, selection.to_glib_none().0, target.to_glib_none().0, property.to_glib_none().0, time_);
+        ffi::gdk_selection_send_notify(requestor.as_ref().to_glib_none().0, selection.to_glib_none().0, target.to_glib_none().0, property.to_glib_none().0, time_);
     }
 }
 
-pub fn selection_send_notify_for_display(display: &Display, requestor: &Window, selection: &Atom, target: &Atom, property: &Atom, time_: u32) {
+pub fn selection_send_notify_for_display<P: IsA<Window>>(display: &Display, requestor: &P, selection: &Atom, target: &Atom, property: &Atom, time_: u32) {
     skip_assert_initialized!();
     unsafe {
-        ffi::gdk_selection_send_notify_for_display(display.to_glib_none().0, requestor.to_glib_none().0, selection.to_glib_none().0, target.to_glib_none().0, property.to_glib_none().0, time_);
+        ffi::gdk_selection_send_notify_for_display(display.to_glib_none().0, requestor.as_ref().to_glib_none().0, selection.to_glib_none().0, target.to_glib_none().0, property.to_glib_none().0, time_);
     }
 }
 
-#[cfg(any(feature = "v3_10", feature = "dox"))]
 pub fn set_allowed_backends(backends: &str) {
     assert_initialized_main_thread!();
     unsafe {
@@ -405,35 +349,35 @@ pub fn set_show_events(show_events: bool) {
     }
 }
 
-pub fn synthesize_window_state(window: &Window, unset_flags: WindowState, set_flags: WindowState) {
+pub fn synthesize_window_state<P: IsA<Window>>(window: &P, unset_flags: WindowState, set_flags: WindowState) {
     skip_assert_initialized!();
     unsafe {
-        ffi::gdk_synthesize_window_state(window.to_glib_none().0, unset_flags.to_glib(), set_flags.to_glib());
+        ffi::gdk_synthesize_window_state(window.as_ref().to_glib_none().0, unset_flags.to_glib(), set_flags.to_glib());
     }
 }
 
-pub fn test_render_sync(window: &Window) {
+pub fn test_render_sync<P: IsA<Window>>(window: &P) {
     skip_assert_initialized!();
     unsafe {
-        ffi::gdk_test_render_sync(window.to_glib_none().0);
+        ffi::gdk_test_render_sync(window.as_ref().to_glib_none().0);
     }
 }
 
-pub fn test_simulate_button(window: &Window, x: i32, y: i32, button: u32, modifiers: ModifierType, button_pressrelease: EventType) -> bool {
+pub fn test_simulate_button<P: IsA<Window>>(window: &P, x: i32, y: i32, button: u32, modifiers: ModifierType, button_pressrelease: EventType) -> bool {
     skip_assert_initialized!();
     unsafe {
-        from_glib(ffi::gdk_test_simulate_button(window.to_glib_none().0, x, y, button, modifiers.to_glib(), button_pressrelease.to_glib()))
+        from_glib(ffi::gdk_test_simulate_button(window.as_ref().to_glib_none().0, x, y, button, modifiers.to_glib(), button_pressrelease.to_glib()))
     }
 }
 
-pub fn test_simulate_key(window: &Window, x: i32, y: i32, keyval: u32, modifiers: ModifierType, key_pressrelease: EventType) -> bool {
+pub fn test_simulate_key<P: IsA<Window>>(window: &P, x: i32, y: i32, keyval: u32, modifiers: ModifierType, key_pressrelease: EventType) -> bool {
     skip_assert_initialized!();
     unsafe {
-        from_glib(ffi::gdk_test_simulate_key(window.to_glib_none().0, x, y, keyval, modifiers.to_glib(), key_pressrelease.to_glib()))
+        from_glib(ffi::gdk_test_simulate_key(window.as_ref().to_glib_none().0, x, y, keyval, modifiers.to_glib(), key_pressrelease.to_glib()))
     }
 }
 
-pub fn text_property_to_utf8_list_for_display(display: &Display, encoding: &Atom, format: i32, text: &[u8]) -> (i32, Vec<String>) {
+pub fn text_property_to_utf8_list_for_display(display: &Display, encoding: &Atom, format: i32, text: &[u8]) -> (i32, Vec<GString>) {
     skip_assert_initialized!();
     let length = text.len() as i32;
     unsafe {
@@ -443,57 +387,28 @@ pub fn text_property_to_utf8_list_for_display(display: &Display, encoding: &Atom
     }
 }
 
-//pub fn threads_add_idle<P: Into<Option</*Unimplemented*/Fundamental: Pointer>>>(function: /*Unknown conversion*//*Unimplemented*/SourceFunc, data: P) -> u32 {
+//pub fn threads_add_idle(function: /*Ignored*/glib::Fn() -> bool + 'static, data: /*Unimplemented*/Option<Fundamental: Pointer>) -> u32 {
 //    unsafe { TODO: call ffi::gdk_threads_add_idle() }
 //}
 
-//pub fn threads_add_idle_full<'a, P: Into<Option</*Unimplemented*/Fundamental: Pointer>>, Q: Into<Option<&'a /*Ignored*/glib::DestroyNotify>>>(priority: i32, function: /*Unknown conversion*//*Unimplemented*/SourceFunc, data: P, notify: Q) -> u32 {
+//pub fn threads_add_idle_full(priority: i32, function: /*Ignored*/glib::Fn() -> bool + 'static, data: /*Unimplemented*/Option<Fundamental: Pointer>) -> u32 {
 //    unsafe { TODO: call ffi::gdk_threads_add_idle_full() }
 //}
 
-//pub fn threads_add_timeout<P: Into<Option</*Unimplemented*/Fundamental: Pointer>>>(interval: u32, function: /*Unknown conversion*//*Unimplemented*/SourceFunc, data: P) -> u32 {
+//pub fn threads_add_timeout(interval: u32, function: /*Ignored*/glib::Fn() -> bool + 'static, data: /*Unimplemented*/Option<Fundamental: Pointer>) -> u32 {
 //    unsafe { TODO: call ffi::gdk_threads_add_timeout() }
 //}
 
-//pub fn threads_add_timeout_full<'a, P: Into<Option</*Unimplemented*/Fundamental: Pointer>>, Q: Into<Option<&'a /*Ignored*/glib::DestroyNotify>>>(priority: i32, interval: u32, function: /*Unknown conversion*//*Unimplemented*/SourceFunc, data: P, notify: Q) -> u32 {
+//pub fn threads_add_timeout_full(priority: i32, interval: u32, function: /*Ignored*/glib::Fn() -> bool + 'static, data: /*Unimplemented*/Option<Fundamental: Pointer>) -> u32 {
 //    unsafe { TODO: call ffi::gdk_threads_add_timeout_full() }
 //}
 
-//pub fn threads_add_timeout_seconds<P: Into<Option</*Unimplemented*/Fundamental: Pointer>>>(interval: u32, function: /*Unknown conversion*//*Unimplemented*/SourceFunc, data: P) -> u32 {
+//pub fn threads_add_timeout_seconds(interval: u32, function: /*Ignored*/glib::Fn() -> bool + 'static, data: /*Unimplemented*/Option<Fundamental: Pointer>) -> u32 {
 //    unsafe { TODO: call ffi::gdk_threads_add_timeout_seconds() }
 //}
 
-//pub fn threads_add_timeout_seconds_full<'a, P: Into<Option</*Unimplemented*/Fundamental: Pointer>>, Q: Into<Option<&'a /*Ignored*/glib::DestroyNotify>>>(priority: i32, interval: u32, function: /*Unknown conversion*//*Unimplemented*/SourceFunc, data: P, notify: Q) -> u32 {
+//pub fn threads_add_timeout_seconds_full(priority: i32, interval: u32, function: /*Ignored*/glib::Fn() -> bool + 'static, data: /*Unimplemented*/Option<Fundamental: Pointer>) -> u32 {
 //    unsafe { TODO: call ffi::gdk_threads_add_timeout_seconds_full() }
-//}
-
-#[cfg_attr(feature = "v3_6", deprecated)]
-pub fn threads_enter() {
-    assert_initialized_main_thread!();
-    unsafe {
-        ffi::gdk_threads_enter();
-    }
-}
-
-#[cfg_attr(feature = "v3_6", deprecated)]
-pub fn threads_init() {
-    assert_initialized_main_thread!();
-    unsafe {
-        ffi::gdk_threads_init();
-    }
-}
-
-#[cfg_attr(feature = "v3_6", deprecated)]
-pub fn threads_leave() {
-    assert_initialized_main_thread!();
-    unsafe {
-        ffi::gdk_threads_leave();
-    }
-}
-
-//#[cfg_attr(feature = "v3_6", deprecated)]
-//pub fn threads_set_lock_functions(enter_fn: /*Unknown conversion*//*Unimplemented*/Callback, leave_fn: /*Unknown conversion*//*Unimplemented*/Callback) {
-//    unsafe { TODO: call ffi::gdk_threads_set_lock_functions() }
 //}
 
 pub fn unicode_to_keyval(wc: u32) -> u32 {
@@ -503,7 +418,7 @@ pub fn unicode_to_keyval(wc: u32) -> u32 {
     }
 }
 
-pub fn utf8_to_string_target(str: &str) -> Option<String> {
+pub fn utf8_to_string_target(str: &str) -> Option<GString> {
     assert_initialized_main_thread!();
     unsafe {
         from_glib_full(ffi::gdk_utf8_to_string_target(str.to_glib_none().0))

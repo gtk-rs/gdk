@@ -7,7 +7,6 @@ use glib::translate::*;
 use ffi;
 
 use glib_ffi;
-use gobject_ffi;
 use std::ptr;
 use std::mem;
 use std::fmt;
@@ -23,7 +22,6 @@ use ScrollDirection;
 #[cfg(any(feature = "v3_20", feature = "dox"))]
 use Seat;
 use Screen;
-#[cfg(any(feature = "v3_10", feature = "dox"))]
 use Window;
 
 glib_wrapper! {
@@ -55,7 +53,7 @@ impl Event {
     }
 
     /// Set the event handler.
-    /// 
+    ///
     /// The callback `handler` is called for each event. If `None`, event
     /// handling is disabled.
     pub fn set_handler<F: Fn(&mut Event) +'static>(handler: Option<F>) {
@@ -63,13 +61,13 @@ impl Event {
         if let Some(handler) = handler {
             // allocate and convert to target type
             // double box to reduce a fat pointer to a simple pointer
-            let boxed: Box<Box<Fn(&mut Event) + 'static>> = Box::new(Box::new(handler));
+            let boxed: Box<F> = Box::new(handler);
             let ptr: *mut c_void = Box::into_raw(boxed) as *mut _;
             unsafe {
                 ffi::gdk_event_handler_set(
-                    Some(event_handler_trampoline),
+                    Some(event_handler_trampoline::<F>),
                     ptr,
-                    Some(event_handler_destroy))
+                    Some(event_handler_destroy::<F>))
             }
         } else {
             unsafe { ffi::gdk_event_handler_set(None, ptr::null_mut(), None) }
@@ -210,7 +208,6 @@ impl Event {
         }
     }
 
-    #[cfg(any(feature = "v3_10", feature = "dox"))]
     /// Returns the associated `Window` if applicable.
     pub fn get_window(&self) -> Option<Window> {
         unsafe {
@@ -320,6 +317,28 @@ impl Event {
     /// Tries to downcast to a specific event type.
     pub fn downcast<T: FromEvent>(self) -> Result<T, Self> {
         T::from(self)
+    }
+
+    /// Tries to downcast to a specific event type.
+    pub fn downcast_ref<T: FromEvent>(&self) -> Option<&T> {
+        if T::is(self) {
+            unsafe {
+                Some(mem::transmute::<&Event, &T>(self))
+            }
+        } else {
+            None
+        }
+    }
+
+    /// Tries to downcast to a specific event type.
+    pub fn downcast_mut<T: FromEvent>(&mut self) -> Option<&mut T> {
+        if T::is(self) {
+            unsafe {
+                Some(mem::transmute::<&mut Event, &mut T>(self))
+            }
+        } else {
+            None
+        }
     }
 }
 
@@ -445,19 +464,17 @@ macro_rules! event_subtype {
     }
 }
 
-unsafe extern "C" fn event_handler_trampoline(event: *mut ffi::GdkEvent, ptr: glib_ffi::gpointer) {
+unsafe extern "C" fn event_handler_trampoline<F: Fn(&mut Event) +'static>(event: *mut ffi::GdkEvent, ptr: glib_ffi::gpointer) {
     if ptr != ptr::null_mut() {
-        let raw: *mut Box<dyn Fn(&mut Event) +'static> = ptr as _;
-        let f: &(dyn Fn(&mut Event) +'static) = &**raw;
+        let f: &F = &*(ptr as *mut _);
         let mut event = from_glib_none(event);
         f(&mut event)
     }
 }
 
-unsafe extern "C" fn event_handler_destroy(ptr: glib_ffi::gpointer) {
+unsafe extern "C" fn event_handler_destroy<F: Fn(&mut Event) +'static>(ptr: glib_ffi::gpointer) {
     if ptr != ptr::null_mut() {
         // convert back to Box and free
-        let raw: *mut Box<dyn Fn(&mut Event) +'static> = ptr as _;
-        let _boxed: Box<Box<dyn Fn(&mut Event) +'static>> = Box::from_raw(raw);
+        let _boxed: Box<F> = Box::from_raw(ptr as *mut _);
     }
 }

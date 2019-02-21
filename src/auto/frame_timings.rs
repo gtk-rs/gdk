@@ -4,10 +4,6 @@
 
 use ffi;
 use glib::translate::*;
-use glib_ffi;
-use gobject_ffi;
-use std::mem;
-use std::ptr;
 
 glib_wrapper! {
     #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -21,45 +17,21 @@ glib_wrapper! {
 }
 
 impl FrameTimings {
-    #[cfg(any(feature = "v3_8", feature = "dox"))]
     pub fn get_complete(&self) -> bool {
         unsafe {
             from_glib(ffi::gdk_frame_timings_get_complete(self.to_glib_none().0))
         }
     }
 
-    #[cfg(any(feature = "v3_8", feature = "dox"))]
     pub fn get_frame_counter(&self) -> i64 {
         unsafe {
             ffi::gdk_frame_timings_get_frame_counter(self.to_glib_none().0)
         }
     }
 
-    #[cfg(any(feature = "v3_8", feature = "dox"))]
     pub fn get_frame_time(&self) -> i64 {
         unsafe {
             ffi::gdk_frame_timings_get_frame_time(self.to_glib_none().0)
-        }
-    }
-
-    #[cfg(any(feature = "v3_8", feature = "dox"))]
-    pub fn get_predicted_presentation_time(&self) -> i64 {
-        unsafe {
-            ffi::gdk_frame_timings_get_predicted_presentation_time(self.to_glib_none().0)
-        }
-    }
-
-    #[cfg(any(feature = "v3_8", feature = "dox"))]
-    pub fn get_presentation_time(&self) -> i64 {
-        unsafe {
-            ffi::gdk_frame_timings_get_presentation_time(self.to_glib_none().0)
-        }
-    }
-
-    #[cfg(any(feature = "v3_8", feature = "dox"))]
-    pub fn get_refresh_interval(&self) -> i64 {
-        unsafe {
-            ffi::gdk_frame_timings_get_refresh_interval(self.to_glib_none().0)
         }
     }
 }

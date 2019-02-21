@@ -10,212 +10,171 @@ use DragCancelReason;
 use DragProtocol;
 use Window;
 use ffi;
-use glib;
-#[cfg(any(feature = "v3_20", feature = "dox"))]
-use glib::object::Downcast;
 use glib::object::IsA;
+#[cfg(any(feature = "v3_20", feature = "dox"))]
+use glib::object::ObjectType;
 #[cfg(any(feature = "v3_20", feature = "dox"))]
 use glib::signal::SignalHandlerId;
 #[cfg(any(feature = "v3_20", feature = "dox"))]
-use glib::signal::connect;
+use glib::signal::connect_raw;
 use glib::translate::*;
+#[cfg(any(feature = "v3_20", feature = "dox"))]
 use glib_ffi;
-use gobject_ffi;
 #[cfg(any(feature = "v3_20", feature = "dox"))]
 use libc;
 #[cfg(any(feature = "v3_20", feature = "dox"))]
 use std::boxed::Box as Box_;
-use std::mem;
+use std::fmt;
 #[cfg(any(feature = "v3_20", feature = "dox"))]
 use std::mem::transmute;
-use std::ptr;
 
 glib_wrapper! {
-    pub struct DragContext(Object<ffi::GdkDragContext>);
+    pub struct DragContext(Object<ffi::GdkDragContext, DragContextClass>);
 
     match fn {
         get_type => || ffi::gdk_drag_context_get_type(),
     }
 }
 
-pub trait DragContextExt {
-    fn get_actions(&self) -> DragAction;
-
-    fn get_dest_window(&self) -> Window;
-
-    fn get_device(&self) -> Device;
-
-    #[cfg(any(feature = "v3_20", feature = "dox"))]
-    fn get_drag_window(&self) -> Option<Window>;
-
-    fn get_protocol(&self) -> DragProtocol;
-
-    fn get_selected_action(&self) -> DragAction;
-
-    fn get_source_window(&self) -> Window;
-
-    fn get_suggested_action(&self) -> DragAction;
-
-    fn list_targets(&self) -> Vec<Atom>;
-
-    #[cfg(any(feature = "v3_20", feature = "dox"))]
-    fn manage_dnd(&self, ipc_window: &Window, actions: DragAction) -> bool;
-
-    fn set_device<P: IsA<Device>>(&self, device: &P);
-
-    #[cfg(any(feature = "v3_20", feature = "dox"))]
-    fn set_hotspot(&self, hot_x: i32, hot_y: i32);
-
-    #[cfg(any(feature = "v3_20", feature = "dox"))]
-    fn connect_action_changed<F: Fn(&Self, DragAction) + 'static>(&self, f: F) -> SignalHandlerId;
-
-    #[cfg(any(feature = "v3_20", feature = "dox"))]
-    fn connect_cancel<F: Fn(&Self, DragCancelReason) + 'static>(&self, f: F) -> SignalHandlerId;
-
-    #[cfg(any(feature = "v3_20", feature = "dox"))]
-    fn connect_dnd_finished<F: Fn(&Self) + 'static>(&self, f: F) -> SignalHandlerId;
-
-    #[cfg(any(feature = "v3_20", feature = "dox"))]
-    fn connect_drop_performed<F: Fn(&Self, i32) + 'static>(&self, f: F) -> SignalHandlerId;
-}
-
-impl<O: IsA<DragContext> + IsA<glib::object::Object>> DragContextExt for O {
-    fn get_actions(&self) -> DragAction {
+impl DragContext {
+    pub fn get_actions(&self) -> DragAction {
         unsafe {
             from_glib(ffi::gdk_drag_context_get_actions(self.to_glib_none().0))
         }
     }
 
-    fn get_dest_window(&self) -> Window {
+    pub fn get_dest_window(&self) -> Window {
         unsafe {
             from_glib_none(ffi::gdk_drag_context_get_dest_window(self.to_glib_none().0))
         }
     }
 
-    fn get_device(&self) -> Device {
+    pub fn get_device(&self) -> Device {
         unsafe {
             from_glib_none(ffi::gdk_drag_context_get_device(self.to_glib_none().0))
         }
     }
 
     #[cfg(any(feature = "v3_20", feature = "dox"))]
-    fn get_drag_window(&self) -> Option<Window> {
+    pub fn get_drag_window(&self) -> Option<Window> {
         unsafe {
             from_glib_none(ffi::gdk_drag_context_get_drag_window(self.to_glib_none().0))
         }
     }
 
-    fn get_protocol(&self) -> DragProtocol {
+    pub fn get_protocol(&self) -> DragProtocol {
         unsafe {
             from_glib(ffi::gdk_drag_context_get_protocol(self.to_glib_none().0))
         }
     }
 
-    fn get_selected_action(&self) -> DragAction {
+    pub fn get_selected_action(&self) -> DragAction {
         unsafe {
             from_glib(ffi::gdk_drag_context_get_selected_action(self.to_glib_none().0))
         }
     }
 
-    fn get_source_window(&self) -> Window {
+    pub fn get_source_window(&self) -> Window {
         unsafe {
             from_glib_none(ffi::gdk_drag_context_get_source_window(self.to_glib_none().0))
         }
     }
 
-    fn get_suggested_action(&self) -> DragAction {
+    pub fn get_suggested_action(&self) -> DragAction {
         unsafe {
             from_glib(ffi::gdk_drag_context_get_suggested_action(self.to_glib_none().0))
         }
     }
 
-    fn list_targets(&self) -> Vec<Atom> {
+    pub fn list_targets(&self) -> Vec<Atom> {
         unsafe {
             FromGlibPtrContainer::from_glib_none(ffi::gdk_drag_context_list_targets(self.to_glib_none().0))
         }
     }
 
     #[cfg(any(feature = "v3_20", feature = "dox"))]
-    fn manage_dnd(&self, ipc_window: &Window, actions: DragAction) -> bool {
+    pub fn manage_dnd<P: IsA<Window>>(&self, ipc_window: &P, actions: DragAction) -> bool {
         unsafe {
-            from_glib(ffi::gdk_drag_context_manage_dnd(self.to_glib_none().0, ipc_window.to_glib_none().0, actions.to_glib()))
+            from_glib(ffi::gdk_drag_context_manage_dnd(self.to_glib_none().0, ipc_window.as_ref().to_glib_none().0, actions.to_glib()))
         }
     }
 
-    fn set_device<P: IsA<Device>>(&self, device: &P) {
+    pub fn set_device(&self, device: &Device) {
         unsafe {
             ffi::gdk_drag_context_set_device(self.to_glib_none().0, device.to_glib_none().0);
         }
     }
 
     #[cfg(any(feature = "v3_20", feature = "dox"))]
-    fn set_hotspot(&self, hot_x: i32, hot_y: i32) {
+    pub fn set_hotspot(&self, hot_x: i32, hot_y: i32) {
         unsafe {
             ffi::gdk_drag_context_set_hotspot(self.to_glib_none().0, hot_x, hot_y);
         }
     }
 
     #[cfg(any(feature = "v3_20", feature = "dox"))]
-    fn connect_action_changed<F: Fn(&Self, DragAction) + 'static>(&self, f: F) -> SignalHandlerId {
+    pub fn connect_action_changed<F: Fn(&DragContext, DragAction) + 'static>(&self, f: F) -> SignalHandlerId {
         unsafe {
-            let f: Box_<Box_<Fn(&Self, DragAction) + 'static>> = Box_::new(Box_::new(f));
-            connect(self.to_glib_none().0, "action-changed",
-                transmute(action_changed_trampoline::<Self> as usize), Box_::into_raw(f) as *mut _)
+            let f: Box_<F> = Box_::new(f);
+            connect_raw(self.as_ptr() as *mut _, b"action-changed\0".as_ptr() as *const _,
+                Some(transmute(action_changed_trampoline::<F> as usize)), Box_::into_raw(f))
         }
     }
 
     #[cfg(any(feature = "v3_20", feature = "dox"))]
-    fn connect_cancel<F: Fn(&Self, DragCancelReason) + 'static>(&self, f: F) -> SignalHandlerId {
+    pub fn connect_cancel<F: Fn(&DragContext, DragCancelReason) + 'static>(&self, f: F) -> SignalHandlerId {
         unsafe {
-            let f: Box_<Box_<Fn(&Self, DragCancelReason) + 'static>> = Box_::new(Box_::new(f));
-            connect(self.to_glib_none().0, "cancel",
-                transmute(cancel_trampoline::<Self> as usize), Box_::into_raw(f) as *mut _)
+            let f: Box_<F> = Box_::new(f);
+            connect_raw(self.as_ptr() as *mut _, b"cancel\0".as_ptr() as *const _,
+                Some(transmute(cancel_trampoline::<F> as usize)), Box_::into_raw(f))
         }
     }
 
     #[cfg(any(feature = "v3_20", feature = "dox"))]
-    fn connect_dnd_finished<F: Fn(&Self) + 'static>(&self, f: F) -> SignalHandlerId {
+    pub fn connect_dnd_finished<F: Fn(&DragContext) + 'static>(&self, f: F) -> SignalHandlerId {
         unsafe {
-            let f: Box_<Box_<Fn(&Self) + 'static>> = Box_::new(Box_::new(f));
-            connect(self.to_glib_none().0, "dnd-finished",
-                transmute(dnd_finished_trampoline::<Self> as usize), Box_::into_raw(f) as *mut _)
+            let f: Box_<F> = Box_::new(f);
+            connect_raw(self.as_ptr() as *mut _, b"dnd-finished\0".as_ptr() as *const _,
+                Some(transmute(dnd_finished_trampoline::<F> as usize)), Box_::into_raw(f))
         }
     }
 
     #[cfg(any(feature = "v3_20", feature = "dox"))]
-    fn connect_drop_performed<F: Fn(&Self, i32) + 'static>(&self, f: F) -> SignalHandlerId {
+    pub fn connect_drop_performed<F: Fn(&DragContext, i32) + 'static>(&self, f: F) -> SignalHandlerId {
         unsafe {
-            let f: Box_<Box_<Fn(&Self, i32) + 'static>> = Box_::new(Box_::new(f));
-            connect(self.to_glib_none().0, "drop-performed",
-                transmute(drop_performed_trampoline::<Self> as usize), Box_::into_raw(f) as *mut _)
+            let f: Box_<F> = Box_::new(f);
+            connect_raw(self.as_ptr() as *mut _, b"drop-performed\0".as_ptr() as *const _,
+                Some(transmute(drop_performed_trampoline::<F> as usize)), Box_::into_raw(f))
         }
     }
 }
 
 #[cfg(any(feature = "v3_20", feature = "dox"))]
-unsafe extern "C" fn action_changed_trampoline<P>(this: *mut ffi::GdkDragContext, action: ffi::GdkDragAction, f: glib_ffi::gpointer)
-where P: IsA<DragContext> {
-    let f: &&(Fn(&P, DragAction) + 'static) = transmute(f);
-    f(&DragContext::from_glib_borrow(this).downcast_unchecked(), from_glib(action))
+unsafe extern "C" fn action_changed_trampoline<F: Fn(&DragContext, DragAction) + 'static>(this: *mut ffi::GdkDragContext, action: ffi::GdkDragAction, f: glib_ffi::gpointer) {
+    let f: &F = transmute(f);
+    f(&from_glib_borrow(this), from_glib(action))
 }
 
 #[cfg(any(feature = "v3_20", feature = "dox"))]
-unsafe extern "C" fn cancel_trampoline<P>(this: *mut ffi::GdkDragContext, reason: ffi::GdkDragCancelReason, f: glib_ffi::gpointer)
-where P: IsA<DragContext> {
-    let f: &&(Fn(&P, DragCancelReason) + 'static) = transmute(f);
-    f(&DragContext::from_glib_borrow(this).downcast_unchecked(), from_glib(reason))
+unsafe extern "C" fn cancel_trampoline<F: Fn(&DragContext, DragCancelReason) + 'static>(this: *mut ffi::GdkDragContext, reason: ffi::GdkDragCancelReason, f: glib_ffi::gpointer) {
+    let f: &F = transmute(f);
+    f(&from_glib_borrow(this), from_glib(reason))
 }
 
 #[cfg(any(feature = "v3_20", feature = "dox"))]
-unsafe extern "C" fn dnd_finished_trampoline<P>(this: *mut ffi::GdkDragContext, f: glib_ffi::gpointer)
-where P: IsA<DragContext> {
-    let f: &&(Fn(&P) + 'static) = transmute(f);
-    f(&DragContext::from_glib_borrow(this).downcast_unchecked())
+unsafe extern "C" fn dnd_finished_trampoline<F: Fn(&DragContext) + 'static>(this: *mut ffi::GdkDragContext, f: glib_ffi::gpointer) {
+    let f: &F = transmute(f);
+    f(&from_glib_borrow(this))
 }
 
 #[cfg(any(feature = "v3_20", feature = "dox"))]
-unsafe extern "C" fn drop_performed_trampoline<P>(this: *mut ffi::GdkDragContext, time: libc::c_int, f: glib_ffi::gpointer)
-where P: IsA<DragContext> {
-    let f: &&(Fn(&P, i32) + 'static) = transmute(f);
-    f(&DragContext::from_glib_borrow(this).downcast_unchecked(), time)
+unsafe extern "C" fn drop_performed_trampoline<F: Fn(&DragContext, i32) + 'static>(this: *mut ffi::GdkDragContext, time: libc::c_int, f: glib_ffi::gpointer) {
+    let f: &F = transmute(f);
+    f(&from_glib_borrow(this), time)
+}
+
+impl fmt::Display for DragContext {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "DragContext")
+    }
 }
