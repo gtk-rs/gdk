@@ -6,4 +6,6 @@
 
 pub use auto::traits::*;
 pub use cairo_interaction::ContextExt;
+pub use device::DeviceExtManual;
+pub use frame_clock::FrameClockExtManual;
 pub use window::WindowExtManual;

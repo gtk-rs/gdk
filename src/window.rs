@@ -114,12 +114,6 @@ impl Window {
                 attributes.get_mask() as c_int))
         }
     }
-
-    pub fn create_similar_surface(&self, content: cairo::Content, width: i32, height: i32) -> Option<Surface> {
-        unsafe {
-            from_glib_full(gdk_sys::gdk_window_create_similar_surface(self.to_glib_none().0, content.into(), width, height))
-        }
-    }
 }
 
 pub trait WindowExtManual: 'static {
@@ -143,6 +137,8 @@ pub trait WindowExtManual: 'static {
     fn get_background_pattern(&self) -> Option<cairo::Pattern>;
 
     fn set_background_pattern(&self, pattern: Option<&cairo::Pattern>);
+
+    fn create_similar_surface(&self, content: cairo::Content, width: i32, height: i32) -> Option<Surface>;
 }
 
 impl<O: IsA<Window>> WindowExtManual for O {
@@ -208,6 +204,12 @@ impl<O: IsA<Window>> WindowExtManual for O {
                 ::std::ptr::null_mut()
             };
             gdk_sys::gdk_window_set_background_pattern(self.as_ref().to_glib_none().0, ptr);
+        }
+    }
+
+    fn create_similar_surface(&self, content: cairo::Content, width: i32, height: i32) -> Option<Surface> {
+        unsafe {
+            from_glib_full(gdk_sys::gdk_window_create_similar_surface(self.as_ref().to_glib_none().0, content.into(), width, height))
         }
     }
 }
