@@ -17,9 +17,9 @@ pub use self::device_manager::{DeviceManager, DeviceManagerClass};
 #[cfg(any(feature = "v3_22", feature = "dox"))]
 mod device_pad;
 #[cfg(any(feature = "v3_22", feature = "dox"))]
-pub use self::device_pad::{DevicePad, NONE_DEVICE_PAD};
-#[cfg(any(feature = "v3_22", feature = "dox"))]
 pub use self::device_pad::DevicePadExt;
+#[cfg(any(feature = "v3_22", feature = "dox"))]
+pub use self::device_pad::{DevicePad, NONE_DEVICE_PAD};
 
 #[cfg(any(feature = "v3_22", feature = "dox"))]
 mod device_tool;
@@ -38,13 +38,10 @@ pub use self::drag_context::{DragContext, DragContextClass};
 #[cfg(any(feature = "v3_22", feature = "dox"))]
 mod drawing_context;
 #[cfg(any(feature = "v3_22", feature = "dox"))]
-pub use self::drawing_context::{DrawingContext, DrawingContextClass, NONE_DRAWING_CONTEXT};
-#[cfg(any(feature = "v3_22", feature = "dox"))]
-pub use self::drawing_context::DrawingContextExt;
+pub use self::drawing_context::{DrawingContext, DrawingContextClass};
 
 mod frame_clock;
-pub use self::frame_clock::{FrameClock, FrameClockClass, NONE_FRAME_CLOCK};
-pub use self::frame_clock::FrameClockExt;
+pub use self::frame_clock::{FrameClock, FrameClockClass};
 
 #[cfg(any(feature = "v3_16", feature = "dox"))]
 mod gl_context;
@@ -54,9 +51,7 @@ pub use self::gl_context::{GLContext, GLContextClass};
 #[cfg(any(feature = "v3_22", feature = "dox"))]
 mod monitor;
 #[cfg(any(feature = "v3_22", feature = "dox"))]
-pub use self::monitor::{Monitor, MonitorClass, NONE_MONITOR};
-#[cfg(any(feature = "v3_22", feature = "dox"))]
-pub use self::monitor::MonitorExt;
+pub use self::monitor::{Monitor, MonitorClass};
 
 mod screen;
 pub use self::screen::{Screen, ScreenClass};
@@ -70,8 +65,8 @@ mod visual;
 pub use self::visual::{Visual, VisualClass};
 
 mod window;
-pub use self::window::{Window, WindowClass, NONE_WINDOW};
 pub use self::window::WindowExt;
+pub use self::window::{Window, WindowClass, NONE_WINDOW};
 
 mod event_sequence;
 pub use self::event_sequence::EventSequence;
@@ -138,10 +133,5 @@ pub mod functions;
 pub mod traits {
     #[cfg(any(feature = "v3_22", feature = "dox"))]
     pub use super::DevicePadExt;
-    #[cfg(any(feature = "v3_22", feature = "dox"))]
-    pub use super::DrawingContextExt;
-    pub use super::FrameClockExt;
-    #[cfg(any(feature = "v3_22", feature = "dox"))]
-    pub use super::MonitorExt;
     pub use super::WindowExt;
 }
