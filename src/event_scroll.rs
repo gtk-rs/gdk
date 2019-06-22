@@ -2,14 +2,14 @@
 // See the COPYRIGHT file at the top-level directory of this distribution.
 // Licensed under the MIT license, see the LICENSE file or <http://opensource.org/licenses/MIT>
 
+use gdk_sys;
 use glib::translate::*;
-use ffi;
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct EventScroll(::Event);
 
 event_wrapper!(EventScroll, GdkEventScroll);
-event_subtype!(EventScroll, ffi::GDK_SCROLL);
+event_subtype!(EventScroll, gdk_sys::GDK_SCROLL);
 
 impl EventScroll {
     pub fn get_time(&self) -> u32 {
@@ -46,8 +46,7 @@ impl EventScroll {
         (dx, dy)
     }
 
-    // TODO: to be uncommented when the field will be generated
-    // pub fn get_is_stop(&self) -> bool {
-    //     from_glib(self.as_ref().is_stop)
-    // }
+    pub fn get_is_stop(&self) -> bool {
+        self.as_ref().is_stop & 1 != 0
+    }
 }

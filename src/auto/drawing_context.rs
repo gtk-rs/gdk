@@ -3,65 +3,48 @@
 // DO NOT EDIT
 
 #[cfg(any(feature = "v3_22", feature = "dox"))]
-use Window;
-#[cfg(any(feature = "v3_22", feature = "dox"))]
 use cairo;
-use ffi;
-use glib::object::IsA;
+use gdk_sys;
 use glib::translate::*;
 use std::fmt;
+#[cfg(any(feature = "v3_22", feature = "dox"))]
+use Window;
 
 glib_wrapper! {
-    pub struct DrawingContext(Object<ffi::GdkDrawingContext, ffi::GdkDrawingContextClass, DrawingContextClass>);
+    pub struct DrawingContext(Object<gdk_sys::GdkDrawingContext, gdk_sys::GdkDrawingContextClass, DrawingContextClass>);
 
     match fn {
-        get_type => || ffi::gdk_drawing_context_get_type(),
+        get_type => || gdk_sys::gdk_drawing_context_get_type(),
     }
 }
 
-pub const NONE_DRAWING_CONTEXT: Option<&DrawingContext> = None;
-
-pub trait DrawingContextExt: 'static {
+impl DrawingContext {
     #[cfg(any(feature = "v3_22", feature = "dox"))]
-    fn get_cairo_context(&self) -> Option<cairo::Context>;
-
-    #[cfg(any(feature = "v3_22", feature = "dox"))]
-    fn get_clip(&self) -> Option<cairo::Region>;
-
-    #[cfg(any(feature = "v3_22", feature = "dox"))]
-    fn get_window(&self) -> Option<Window>;
-
-    #[cfg(any(feature = "v3_22", feature = "dox"))]
-    fn is_valid(&self) -> bool;
-}
-
-impl<O: IsA<DrawingContext>> DrawingContextExt for O {
-    #[cfg(any(feature = "v3_22", feature = "dox"))]
-    fn get_cairo_context(&self) -> Option<cairo::Context> {
+    pub fn get_cairo_context(&self) -> Option<cairo::Context> {
         unsafe {
-            from_glib_none(ffi::gdk_drawing_context_get_cairo_context(self.as_ref().to_glib_none().0))
+            from_glib_none(gdk_sys::gdk_drawing_context_get_cairo_context(
+                self.to_glib_none().0,
+            ))
         }
     }
 
     #[cfg(any(feature = "v3_22", feature = "dox"))]
-    fn get_clip(&self) -> Option<cairo::Region> {
+    pub fn get_clip(&self) -> Option<cairo::Region> {
+        unsafe { from_glib_full(gdk_sys::gdk_drawing_context_get_clip(self.to_glib_none().0)) }
+    }
+
+    #[cfg(any(feature = "v3_22", feature = "dox"))]
+    pub fn get_window(&self) -> Option<Window> {
         unsafe {
-            from_glib_full(ffi::gdk_drawing_context_get_clip(self.as_ref().to_glib_none().0))
+            from_glib_none(gdk_sys::gdk_drawing_context_get_window(
+                self.to_glib_none().0,
+            ))
         }
     }
 
     #[cfg(any(feature = "v3_22", feature = "dox"))]
-    fn get_window(&self) -> Option<Window> {
-        unsafe {
-            from_glib_none(ffi::gdk_drawing_context_get_window(self.as_ref().to_glib_none().0))
-        }
-    }
-
-    #[cfg(any(feature = "v3_22", feature = "dox"))]
-    fn is_valid(&self) -> bool {
-        unsafe {
-            from_glib(ffi::gdk_drawing_context_is_valid(self.as_ref().to_glib_none().0))
-        }
+    pub fn is_valid(&self) -> bool {
+        unsafe { from_glib(gdk_sys::gdk_drawing_context_is_valid(self.to_glib_none().0)) }
     }
 }
 

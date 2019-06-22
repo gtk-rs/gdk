@@ -2,14 +2,14 @@
 // See the COPYRIGHT file at the top-level directory of this distribution.
 // Licensed under the MIT license, see the LICENSE file or <http://opensource.org/licenses/MIT>
 
+use gdk_sys;
 use glib::translate::*;
-use ffi;
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct EventKey(::Event);
 
 event_wrapper!(EventKey, GdkEventKey);
-event_subtype!(EventKey, ffi::GDK_KEY_PRESS | ffi::GDK_KEY_RELEASE);
+event_subtype!(EventKey, gdk_sys::GDK_KEY_PRESS | gdk_sys::GDK_KEY_RELEASE);
 
 impl EventKey {
     pub fn get_time(&self) -> u32 {
@@ -38,8 +38,7 @@ impl EventKey {
         self.as_ref().group
     }
 
-    // TODO: to be uncommented when the field will be generated
-    // pub fn get_is_modifier(&self) -> bool {
-    //     from_glib(self.as_ref().is_modifier)
-    // }
+    pub fn get_is_modifier(&self) -> bool {
+        self.as_ref().is_modifier & 1 != 0
+    }
 }
