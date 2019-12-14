@@ -13,7 +13,7 @@ use Cursor;
 use Visual;
 use Window;
 
-use {WindowHints, WindowType, WindowTypeHint, WindowWindowClass};
+use {WindowType, WindowTypeHint, WindowWindowClass};
 
 pub struct WindowAttr {
     pub title: Option<String>,
@@ -148,8 +148,6 @@ pub trait WindowExtManual: 'static {
     #[cfg_attr(feature = "cargo-clippy", allow(mut_from_ref))]
     unsafe fn get_user_data<T>(&self) -> &mut T;
 
-    fn set_geometry_hints(&self, geometry: &gdk_sys::GdkGeometry, geom_mask: WindowHints);
-
     fn get_default_root_window() -> Window;
 
     fn offscreen_window_set_embedder(&self, embedder: &Window);
@@ -183,16 +181,6 @@ impl<O: IsA<Window>> WindowExtManual for O {
         let mut pointer = ::std::ptr::null_mut();
         gdk_sys::gdk_window_get_user_data(self.as_ref().to_glib_none().0, &mut pointer);
         &mut *(pointer as *mut T)
-    }
-
-    fn set_geometry_hints(&self, geometry: &gdk_sys::GdkGeometry, geom_mask: WindowHints) {
-        unsafe {
-            gdk_sys::gdk_window_set_geometry_hints(
-                self.as_ref().to_glib_none().0,
-                geometry,
-                geom_mask.to_glib(),
-            )
-        }
     }
 
     fn get_default_root_window() -> Window {

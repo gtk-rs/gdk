@@ -37,7 +37,6 @@ pub mod prelude;
 
 pub use self::auto::functions::*;
 pub use auto::*;
-pub use prelude::*;
 
 pub mod enums;
 
@@ -79,15 +78,17 @@ mod frame_clock;
 mod frame_timings;
 mod functions;
 mod geometry;
+mod keymap;
+mod keymap_key;
 mod keys;
 mod rectangle;
 mod rgba;
 mod screen;
+mod time_coord;
 mod visual;
 mod window;
 
 pub use gdk_sys::GdkColor as Color;
-pub use glib::Error;
 
 pub use self::rt::{init, set_initialized};
 
@@ -141,8 +142,10 @@ pub use event_visibility::EventVisibility;
 pub use event_window_state::EventWindowState;
 pub use functions::*;
 pub use geometry::Geometry;
+pub use keymap_key::KeymapKey;
 pub use rectangle::Rectangle;
 pub use rgba::{RgbaParseError, RGBA};
+pub use time_coord::TimeCoord;
 pub use window::WindowAttr;
 
 #[allow(non_camel_case_types)]
