@@ -57,12 +57,13 @@ pub fn error_trap_push() {
 pub fn events_get_angle(event1: &mut Event, event2: &mut Event) -> Option<f64> {
     assert_initialized_main_thread!();
     unsafe {
-        let mut angle = mem::uninitialized();
+        let mut angle = mem::MaybeUninit::uninit();
         let ret = from_glib(gdk_sys::gdk_events_get_angle(
             event1.to_glib_none_mut().0,
             event2.to_glib_none_mut().0,
-            &mut angle,
+            angle.as_mut_ptr(),
         ));
+        let angle = angle.assume_init();
         if ret {
             Some(angle)
         } else {
@@ -74,14 +75,16 @@ pub fn events_get_angle(event1: &mut Event, event2: &mut Event) -> Option<f64> {
 pub fn events_get_center(event1: &mut Event, event2: &mut Event) -> Option<(f64, f64)> {
     assert_initialized_main_thread!();
     unsafe {
-        let mut x = mem::uninitialized();
-        let mut y = mem::uninitialized();
+        let mut x = mem::MaybeUninit::uninit();
+        let mut y = mem::MaybeUninit::uninit();
         let ret = from_glib(gdk_sys::gdk_events_get_center(
             event1.to_glib_none_mut().0,
             event2.to_glib_none_mut().0,
-            &mut x,
-            &mut y,
+            x.as_mut_ptr(),
+            y.as_mut_ptr(),
         ));
+        let x = x.assume_init();
+        let y = y.assume_init();
         if ret {
             Some((x, y))
         } else {
@@ -93,12 +96,13 @@ pub fn events_get_center(event1: &mut Event, event2: &mut Event) -> Option<(f64,
 pub fn events_get_distance(event1: &mut Event, event2: &mut Event) -> Option<f64> {
     assert_initialized_main_thread!();
     unsafe {
-        let mut distance = mem::uninitialized();
+        let mut distance = mem::MaybeUninit::uninit();
         let ret = from_glib(gdk_sys::gdk_events_get_distance(
             event1.to_glib_none_mut().0,
             event2.to_glib_none_mut().0,
-            &mut distance,
+            distance.as_mut_ptr(),
         ));
+        let distance = distance.assume_init();
         if ret {
             Some(distance)
         } else {
@@ -141,9 +145,11 @@ pub fn get_show_events() -> bool {
 pub fn keyval_convert_case(symbol: u32) -> (u32, u32) {
     assert_initialized_main_thread!();
     unsafe {
-        let mut lower = mem::uninitialized();
-        let mut upper = mem::uninitialized();
-        gdk_sys::gdk_keyval_convert_case(symbol, &mut lower, &mut upper);
+        let mut lower = mem::MaybeUninit::uninit();
+        let mut upper = mem::MaybeUninit::uninit();
+        gdk_sys::gdk_keyval_convert_case(symbol, lower.as_mut_ptr(), upper.as_mut_ptr());
+        let lower = lower.assume_init();
+        let upper = upper.assume_init();
         (lower, upper)
     }
 }
@@ -270,8 +276,8 @@ pub fn property_get<P: IsA<Window>>(
     skip_assert_initialized!();
     unsafe {
         let mut actual_property_type = Atom::uninitialized();
-        let mut actual_format = mem::uninitialized();
-        let mut actual_length = mem::uninitialized();
+        let mut actual_format = mem::MaybeUninit::uninit();
+        let mut actual_length = mem::MaybeUninit::uninit();
         let mut data = ptr::null_mut();
         let ret = from_glib(gdk_sys::gdk_property_get(
             window.as_ref().to_glib_none().0,
@@ -281,15 +287,16 @@ pub fn property_get<P: IsA<Window>>(
             length,
             pdelete,
             actual_property_type.to_glib_none_mut().0,
-            &mut actual_format,
-            &mut actual_length,
+            actual_format.as_mut_ptr(),
+            actual_length.as_mut_ptr(),
             &mut data,
         ));
+        let actual_format = actual_format.assume_init();
         if ret {
             Some((
                 actual_property_type,
                 actual_format,
-                FromGlibContainer::from_glib_full_num(data, actual_length as usize),
+                FromGlibContainer::from_glib_full_num(data, actual_length.assume_init() as usize),
             ))
         } else {
             None
@@ -302,9 +309,9 @@ pub fn query_depths() -> Vec<i32> {
     assert_initialized_main_thread!();
     unsafe {
         let mut depths = ptr::null_mut();
-        let mut count = mem::uninitialized();
-        gdk_sys::gdk_query_depths(&mut depths, &mut count);
-        FromGlibContainer::from_glib_none_num(depths, count as usize)
+        let mut count = mem::MaybeUninit::uninit();
+        gdk_sys::gdk_query_depths(&mut depths, count.as_mut_ptr());
+        FromGlibContainer::from_glib_none_num(depths, count.assume_init() as usize)
     }
 }
 
@@ -537,7 +544,7 @@ pub fn text_property_to_utf8_list_for_display(
 
 pub fn threads_add_idle<P: Fn() -> bool + Send + Sync + 'static>(function: P) -> u32 {
     assert_initialized_main_thread!();
-    let function_data: Box_<P> = Box::new(function);
+    let function_data: Box_<P> = Box_::new(function);
     unsafe extern "C" fn function_func<P: Fn() -> bool + Send + Sync + 'static>(
         user_data: glib_sys::gpointer,
     ) -> glib_sys::gboolean {
@@ -547,7 +554,7 @@ pub fn threads_add_idle<P: Fn() -> bool + Send + Sync + 'static>(function: P) ->
     }
     let function = Some(function_func::<P> as _);
     let super_callback0: Box_<P> = function_data;
-    unsafe { gdk_sys::gdk_threads_add_idle(function, Box::into_raw(super_callback0) as *mut _) }
+    unsafe { gdk_sys::gdk_threads_add_idle(function, Box_::into_raw(super_callback0) as *mut _) }
 }
 
 pub fn threads_add_idle_full<P: Fn() -> bool + Send + Sync + 'static>(
@@ -555,7 +562,7 @@ pub fn threads_add_idle_full<P: Fn() -> bool + Send + Sync + 'static>(
     function: P,
 ) -> u32 {
     assert_initialized_main_thread!();
-    let function_data: Box_<P> = Box::new(function);
+    let function_data: Box_<P> = Box_::new(function);
     unsafe extern "C" fn function_func<P: Fn() -> bool + Send + Sync + 'static>(
         user_data: glib_sys::gpointer,
     ) -> glib_sys::gboolean {
@@ -575,7 +582,7 @@ pub fn threads_add_idle_full<P: Fn() -> bool + Send + Sync + 'static>(
         gdk_sys::gdk_threads_add_idle_full(
             priority,
             function,
-            Box::into_raw(super_callback0) as *mut _,
+            Box_::into_raw(super_callback0) as *mut _,
             destroy_call3,
         )
     }
@@ -586,7 +593,7 @@ pub fn threads_add_timeout<P: Fn() -> bool + Send + Sync + 'static>(
     function: P,
 ) -> u32 {
     assert_initialized_main_thread!();
-    let function_data: Box_<P> = Box::new(function);
+    let function_data: Box_<P> = Box_::new(function);
     unsafe extern "C" fn function_func<P: Fn() -> bool + Send + Sync + 'static>(
         user_data: glib_sys::gpointer,
     ) -> glib_sys::gboolean {
@@ -600,7 +607,7 @@ pub fn threads_add_timeout<P: Fn() -> bool + Send + Sync + 'static>(
         gdk_sys::gdk_threads_add_timeout(
             interval,
             function,
-            Box::into_raw(super_callback0) as *mut _,
+            Box_::into_raw(super_callback0) as *mut _,
         )
     }
 }
@@ -611,7 +618,7 @@ pub fn threads_add_timeout_full<P: Fn() -> bool + Send + Sync + 'static>(
     function: P,
 ) -> u32 {
     assert_initialized_main_thread!();
-    let function_data: Box_<P> = Box::new(function);
+    let function_data: Box_<P> = Box_::new(function);
     unsafe extern "C" fn function_func<P: Fn() -> bool + Send + Sync + 'static>(
         user_data: glib_sys::gpointer,
     ) -> glib_sys::gboolean {
@@ -632,7 +639,7 @@ pub fn threads_add_timeout_full<P: Fn() -> bool + Send + Sync + 'static>(
             priority,
             interval,
             function,
-            Box::into_raw(super_callback0) as *mut _,
+            Box_::into_raw(super_callback0) as *mut _,
             destroy_call4,
         )
     }
@@ -643,7 +650,7 @@ pub fn threads_add_timeout_seconds<P: Fn() -> bool + Send + Sync + 'static>(
     function: P,
 ) -> u32 {
     assert_initialized_main_thread!();
-    let function_data: Box_<P> = Box::new(function);
+    let function_data: Box_<P> = Box_::new(function);
     unsafe extern "C" fn function_func<P: Fn() -> bool + Send + Sync + 'static>(
         user_data: glib_sys::gpointer,
     ) -> glib_sys::gboolean {
@@ -657,7 +664,7 @@ pub fn threads_add_timeout_seconds<P: Fn() -> bool + Send + Sync + 'static>(
         gdk_sys::gdk_threads_add_timeout_seconds(
             interval,
             function,
-            Box::into_raw(super_callback0) as *mut _,
+            Box_::into_raw(super_callback0) as *mut _,
         )
     }
 }
@@ -668,7 +675,7 @@ pub fn threads_add_timeout_seconds_full<P: Fn() -> bool + Send + Sync + 'static>
     function: P,
 ) -> u32 {
     assert_initialized_main_thread!();
-    let function_data: Box_<P> = Box::new(function);
+    let function_data: Box_<P> = Box_::new(function);
     unsafe extern "C" fn function_func<P: Fn() -> bool + Send + Sync + 'static>(
         user_data: glib_sys::gpointer,
     ) -> glib_sys::gboolean {
@@ -689,7 +696,7 @@ pub fn threads_add_timeout_seconds_full<P: Fn() -> bool + Send + Sync + 'static>
             priority,
             interval,
             function,
-            Box::into_raw(super_callback0) as *mut _,
+            Box_::into_raw(super_callback0) as *mut _,
             destroy_call4,
         )
     }

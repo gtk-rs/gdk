@@ -3,6 +3,8 @@
 // DO NOT EDIT
 
 use gdk_sys;
+#[cfg(any(feature = "v3_16", feature = "dox"))]
+use glib;
 use glib::translate::*;
 use std::fmt;
 #[cfg(any(feature = "v3_16", feature = "dox"))]
@@ -11,8 +13,6 @@ use std::mem;
 use std::ptr;
 #[cfg(any(feature = "v3_16", feature = "dox"))]
 use Display;
-#[cfg(any(feature = "v3_16", feature = "dox"))]
-use Error;
 #[cfg(any(feature = "v3_16", feature = "dox"))]
 use Window;
 
@@ -51,13 +51,15 @@ impl GLContext {
     #[cfg(any(feature = "v3_16", feature = "dox"))]
     pub fn get_required_version(&self) -> (i32, i32) {
         unsafe {
-            let mut major = mem::uninitialized();
-            let mut minor = mem::uninitialized();
+            let mut major = mem::MaybeUninit::uninit();
+            let mut minor = mem::MaybeUninit::uninit();
             gdk_sys::gdk_gl_context_get_required_version(
                 self.to_glib_none().0,
-                &mut major,
-                &mut minor,
+                major.as_mut_ptr(),
+                minor.as_mut_ptr(),
             );
+            let major = major.assume_init();
+            let minor = minor.assume_init();
             (major, minor)
         }
     }
@@ -79,9 +81,15 @@ impl GLContext {
     #[cfg(any(feature = "v3_16", feature = "dox"))]
     pub fn get_version(&self) -> (i32, i32) {
         unsafe {
-            let mut major = mem::uninitialized();
-            let mut minor = mem::uninitialized();
-            gdk_sys::gdk_gl_context_get_version(self.to_glib_none().0, &mut major, &mut minor);
+            let mut major = mem::MaybeUninit::uninit();
+            let mut minor = mem::MaybeUninit::uninit();
+            gdk_sys::gdk_gl_context_get_version(
+                self.to_glib_none().0,
+                major.as_mut_ptr(),
+                minor.as_mut_ptr(),
+            );
+            let major = major.assume_init();
+            let minor = minor.assume_init();
             (major, minor)
         }
     }
@@ -104,7 +112,7 @@ impl GLContext {
     }
 
     #[cfg(any(feature = "v3_16", feature = "dox"))]
-    pub fn realize(&self) -> Result<(), Error> {
+    pub fn realize(&self) -> Result<(), glib::Error> {
         unsafe {
             let mut error = ptr::null_mut();
             let _ = gdk_sys::gdk_gl_context_realize(self.to_glib_none().0, &mut error);

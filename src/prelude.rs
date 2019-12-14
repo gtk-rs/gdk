@@ -5,5 +5,7 @@
 //! Traits intended for blanket imports.
 
 pub use auto::traits::*;
-pub use cairo_interaction::ContextExt;
+pub use cairo_interaction::{GdkContextExt, GdkPixbufExt, GdkSurfaceExt};
+#[doc(hidden)]
+pub use glib::prelude::*;
 pub use window::WindowExtManual;

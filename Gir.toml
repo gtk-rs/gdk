@@ -94,14 +94,17 @@ manual = [
     "Gdk.EventVisibility",
     "Gdk.EventWindowState",
     "Gdk.Geometry",
+    "Gdk.KeymapKey",
     "Gdk.Rectangle",
     "Gdk.RGBA",
+    "Gdk.TimeCoord",
     "GdkPixbuf.Pixbuf",
     "Gio.AppLaunchContext",
     "Gio.Icon",
     "GLib.Error",
     "GObject.Value",
     "Pango.Context",
+    "Pango.Direction",
     "Pango.Layout",
     "Pango.LayoutLine",
 ]
@@ -205,6 +208,12 @@ status = "generate"
     name = "get_display"
         [object.function.return]
         nullable = false
+    [[object.function]]
+    name = "free_history"
+    ignore = true # cannot be used as is
+    [[object.function]]
+    name = "get_history"
+    ignore = true # need to call "free_history" function by hand
     [[object.property]]
     name = "tool"
     version = "3.22"
@@ -301,6 +310,26 @@ version = "3.8"
     ignore = true
 
 [[object]]
+name = "Gdk.Keymap"
+status = "generate"
+    [[object.function]]
+    name = "get_entries_for_keycode"
+    # Invalid generation of Vec<KeymapKey>
+    ignore = true
+    [[object.function]]
+    name = "get_entries_for_keyval"
+    # Invalid generation of Vec<KeymapKey>
+    ignore = true
+    [[object.function]]
+    name = "add_virtual_modifiers"
+    # Invalid usage of "&mut ModifierType"
+    ignore = true
+    [[object.function]]
+    name = "map_virtual_modifiers"
+    # Invalid usage of "&mut ModifierType"
+    ignore = true
+
+[[object]]
 name = "Gdk.Monitor"
 status = "generate"
 version = "3.22"
@@ -364,6 +393,11 @@ manual_traits = ["WindowExtManual"]
     [[object.function]]
     pattern = "[gs]et_background_pattern"
     ignore = true
+    doc_trait_name = "WindowExtManual"
+    [[object.function]]
+    pattern = "[gs]et_user_data"
+    ignore = true
+    doc_trait_name = "WindowExtManual"
     [[object.function]]
     name = "get_effective_toplevel"
         [object.function.return]

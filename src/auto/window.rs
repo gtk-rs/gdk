@@ -6,6 +6,8 @@ use cairo;
 use cairo_sys;
 use gdk_pixbuf;
 use gdk_sys;
+#[cfg(any(feature = "v3_16", feature = "dox"))]
+use glib;
 use glib::object::Cast;
 use glib::object::IsA;
 use glib::signal::connect_raw;
@@ -26,8 +28,6 @@ use Display;
 use DragProtocol;
 #[cfg(any(feature = "v3_22", feature = "dox"))]
 use DrawingContext;
-#[cfg(any(feature = "v3_16", feature = "dox"))]
-use Error;
 use Event;
 use EventMask;
 use FrameClock;
@@ -68,16 +68,18 @@ impl Window {
     ) -> (i32, i32) {
         assert_initialized_main_thread!();
         unsafe {
-            let mut new_width = mem::uninitialized();
-            let mut new_height = mem::uninitialized();
+            let mut new_width = mem::MaybeUninit::uninit();
+            let mut new_height = mem::MaybeUninit::uninit();
             gdk_sys::gdk_window_constrain_size(
                 geometry.to_glib_none_mut().0,
                 flags.to_glib(),
                 width,
                 height,
-                &mut new_width,
-                &mut new_height,
+                new_width.as_mut_ptr(),
+                new_height.as_mut_ptr(),
             );
+            let new_width = new_width.assume_init();
+            let new_height = new_height.assume_init();
             (new_width, new_height)
         }
     }
@@ -150,7 +152,7 @@ pub trait WindowExt: 'static {
     fn coords_to_parent(&self, x: f64, y: f64) -> (f64, f64);
 
     #[cfg(any(feature = "v3_16", feature = "dox"))]
-    fn create_gl_context(&self) -> Result<GLContext, Error>;
+    fn create_gl_context(&self) -> Result<GLContext, glib::Error>;
 
     fn create_similar_image_surface(
         &self,
@@ -269,8 +271,6 @@ pub trait WindowExt: 'static {
     fn get_type_hint(&self) -> WindowTypeHint;
 
     fn get_update_area(&self) -> Option<cairo::Region>;
-
-    //fn get_user_data(&self, data: /*Unimplemented*/&mut Option<Fundamental: Pointer>);
 
     fn get_visible_region(&self) -> Option<cairo::Region>;
 
@@ -440,8 +440,6 @@ pub trait WindowExt: 'static {
 
     fn set_urgency_hint(&self, urgent: bool);
 
-    //fn set_user_data(&self, user_data: /*Ignored*/Option<&glib::Object>);
-
     fn shape_combine_region(
         &self,
         shape_region: Option<&cairo::Region>,
@@ -605,36 +603,40 @@ impl<O: IsA<Window>> WindowExt for O {
 
     fn coords_from_parent(&self, parent_x: f64, parent_y: f64) -> (f64, f64) {
         unsafe {
-            let mut x = mem::uninitialized();
-            let mut y = mem::uninitialized();
+            let mut x = mem::MaybeUninit::uninit();
+            let mut y = mem::MaybeUninit::uninit();
             gdk_sys::gdk_window_coords_from_parent(
                 self.as_ref().to_glib_none().0,
                 parent_x,
                 parent_y,
-                &mut x,
-                &mut y,
+                x.as_mut_ptr(),
+                y.as_mut_ptr(),
             );
+            let x = x.assume_init();
+            let y = y.assume_init();
             (x, y)
         }
     }
 
     fn coords_to_parent(&self, x: f64, y: f64) -> (f64, f64) {
         unsafe {
-            let mut parent_x = mem::uninitialized();
-            let mut parent_y = mem::uninitialized();
+            let mut parent_x = mem::MaybeUninit::uninit();
+            let mut parent_y = mem::MaybeUninit::uninit();
             gdk_sys::gdk_window_coords_to_parent(
                 self.as_ref().to_glib_none().0,
                 x,
                 y,
-                &mut parent_x,
-                &mut parent_y,
+                parent_x.as_mut_ptr(),
+                parent_y.as_mut_ptr(),
             );
+            let parent_x = parent_x.assume_init();
+            let parent_y = parent_y.assume_init();
             (parent_x, parent_y)
         }
     }
 
     #[cfg(any(feature = "v3_16", feature = "dox"))]
-    fn create_gl_context(&self) -> Result<GLContext, Error> {
+    fn create_gl_context(&self) -> Result<GLContext, glib::Error> {
         unsafe {
             let mut error = ptr::null_mut();
             let ret =
@@ -790,11 +792,12 @@ impl<O: IsA<Window>> WindowExt for O {
 
     fn get_decorations(&self) -> Option<WMDecoration> {
         unsafe {
-            let mut decorations = mem::uninitialized();
+            let mut decorations = mem::MaybeUninit::uninit();
             let ret = from_glib(gdk_sys::gdk_window_get_decorations(
                 self.as_ref().to_glib_none().0,
-                &mut decorations,
+                decorations.as_mut_ptr(),
             ));
+            let decorations = decorations.assume_init();
             if ret {
                 Some(from_glib(decorations))
             } else {
@@ -823,16 +826,19 @@ impl<O: IsA<Window>> WindowExt for O {
 
     fn get_device_position(&self, device: &Device) -> (Option<Window>, i32, i32, ModifierType) {
         unsafe {
-            let mut x = mem::uninitialized();
-            let mut y = mem::uninitialized();
-            let mut mask = mem::uninitialized();
+            let mut x = mem::MaybeUninit::uninit();
+            let mut y = mem::MaybeUninit::uninit();
+            let mut mask = mem::MaybeUninit::uninit();
             let ret = from_glib_none(gdk_sys::gdk_window_get_device_position(
                 self.as_ref().to_glib_none().0,
                 device.to_glib_none().0,
-                &mut x,
-                &mut y,
-                &mut mask,
+                x.as_mut_ptr(),
+                y.as_mut_ptr(),
+                mask.as_mut_ptr(),
             ));
+            let x = x.assume_init();
+            let y = y.assume_init();
+            let mask = mask.assume_init();
             (ret, x, y, from_glib(mask))
         }
     }
@@ -842,16 +848,19 @@ impl<O: IsA<Window>> WindowExt for O {
         device: &Device,
     ) -> (Option<Window>, f64, f64, ModifierType) {
         unsafe {
-            let mut x = mem::uninitialized();
-            let mut y = mem::uninitialized();
-            let mut mask = mem::uninitialized();
+            let mut x = mem::MaybeUninit::uninit();
+            let mut y = mem::MaybeUninit::uninit();
+            let mut mask = mem::MaybeUninit::uninit();
             let ret = from_glib_none(gdk_sys::gdk_window_get_device_position_double(
                 self.as_ref().to_glib_none().0,
                 device.to_glib_none().0,
-                &mut x,
-                &mut y,
-                &mut mask,
+                x.as_mut_ptr(),
+                y.as_mut_ptr(),
+                mask.as_mut_ptr(),
             ));
+            let x = x.assume_init();
+            let y = y.assume_init();
+            let mask = mask.assume_init();
             (ret, x, y, from_glib(mask))
         }
     }
@@ -944,17 +953,21 @@ impl<O: IsA<Window>> WindowExt for O {
 
     fn get_geometry(&self) -> (i32, i32, i32, i32) {
         unsafe {
-            let mut x = mem::uninitialized();
-            let mut y = mem::uninitialized();
-            let mut width = mem::uninitialized();
-            let mut height = mem::uninitialized();
+            let mut x = mem::MaybeUninit::uninit();
+            let mut y = mem::MaybeUninit::uninit();
+            let mut width = mem::MaybeUninit::uninit();
+            let mut height = mem::MaybeUninit::uninit();
             gdk_sys::gdk_window_get_geometry(
                 self.as_ref().to_glib_none().0,
-                &mut x,
-                &mut y,
-                &mut width,
-                &mut height,
+                x.as_mut_ptr(),
+                y.as_mut_ptr(),
+                width.as_mut_ptr(),
+                height.as_mut_ptr(),
             );
+            let x = x.assume_init();
+            let y = y.assume_init();
+            let width = width.assume_init();
+            let height = height.assume_init();
             (x, y, width, height)
         }
     }
@@ -981,10 +994,15 @@ impl<O: IsA<Window>> WindowExt for O {
 
     fn get_origin(&self) -> (i32, i32, i32) {
         unsafe {
-            let mut x = mem::uninitialized();
-            let mut y = mem::uninitialized();
-            let ret =
-                gdk_sys::gdk_window_get_origin(self.as_ref().to_glib_none().0, &mut x, &mut y);
+            let mut x = mem::MaybeUninit::uninit();
+            let mut y = mem::MaybeUninit::uninit();
+            let ret = gdk_sys::gdk_window_get_origin(
+                self.as_ref().to_glib_none().0,
+                x.as_mut_ptr(),
+                y.as_mut_ptr(),
+            );
+            let x = x.assume_init();
+            let y = y.assume_init();
             (ret, x, y)
         }
     }
@@ -1008,33 +1026,47 @@ impl<O: IsA<Window>> WindowExt for O {
 
     fn get_position(&self) -> (i32, i32) {
         unsafe {
-            let mut x = mem::uninitialized();
-            let mut y = mem::uninitialized();
-            gdk_sys::gdk_window_get_position(self.as_ref().to_glib_none().0, &mut x, &mut y);
+            let mut x = mem::MaybeUninit::uninit();
+            let mut y = mem::MaybeUninit::uninit();
+            gdk_sys::gdk_window_get_position(
+                self.as_ref().to_glib_none().0,
+                x.as_mut_ptr(),
+                y.as_mut_ptr(),
+            );
+            let x = x.assume_init();
+            let y = y.assume_init();
             (x, y)
         }
     }
 
     fn get_root_coords(&self, x: i32, y: i32) -> (i32, i32) {
         unsafe {
-            let mut root_x = mem::uninitialized();
-            let mut root_y = mem::uninitialized();
+            let mut root_x = mem::MaybeUninit::uninit();
+            let mut root_y = mem::MaybeUninit::uninit();
             gdk_sys::gdk_window_get_root_coords(
                 self.as_ref().to_glib_none().0,
                 x,
                 y,
-                &mut root_x,
-                &mut root_y,
+                root_x.as_mut_ptr(),
+                root_y.as_mut_ptr(),
             );
+            let root_x = root_x.assume_init();
+            let root_y = root_y.assume_init();
             (root_x, root_y)
         }
     }
 
     fn get_root_origin(&self) -> (i32, i32) {
         unsafe {
-            let mut x = mem::uninitialized();
-            let mut y = mem::uninitialized();
-            gdk_sys::gdk_window_get_root_origin(self.as_ref().to_glib_none().0, &mut x, &mut y);
+            let mut x = mem::MaybeUninit::uninit();
+            let mut y = mem::MaybeUninit::uninit();
+            gdk_sys::gdk_window_get_root_origin(
+                self.as_ref().to_glib_none().0,
+                x.as_mut_ptr(),
+                y.as_mut_ptr(),
+            );
+            let x = x.assume_init();
+            let y = y.assume_init();
             (x, y)
         }
     }
@@ -1099,10 +1131,6 @@ impl<O: IsA<Window>> WindowExt for O {
             ))
         }
     }
-
-    //fn get_user_data(&self, data: /*Unimplemented*/&mut Option<Fundamental: Pointer>) {
-    //    unsafe { TODO: call gdk_sys:gdk_window_get_user_data() }
-    //}
 
     fn get_visible_region(&self) -> Option<cairo::Region> {
         unsafe {
@@ -1712,10 +1740,6 @@ impl<O: IsA<Window>> WindowExt for O {
             gdk_sys::gdk_window_set_urgency_hint(self.as_ref().to_glib_none().0, urgent.to_glib());
         }
     }
-
-    //fn set_user_data(&self, user_data: /*Ignored*/Option<&glib::Object>) {
-    //    unsafe { TODO: call gdk_sys:gdk_window_set_user_data() }
-    //}
 
     fn shape_combine_region(
         &self,
