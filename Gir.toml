@@ -19,7 +19,6 @@ generate = [
     "Gdk.CursorType",
     "Gdk.DeviceManager",
     "Gdk.DevicePad",
-    "Gdk.DevicePadFeature",
     "Gdk.DeviceTool",
     "Gdk.DeviceToolType",
     "Gdk.DeviceType",
@@ -187,6 +186,14 @@ status = "generate"
     name = "init"
     #manual
     ignore = true
+    [[object.function]]
+    pattern = "threads_add_idle.*"
+    #use glib::source::idle_add() instead
+    ignore = true
+    [[object.function]]
+    pattern = "threads_add_timeout.*"
+    #use glib::source::timeout_add() instead
+    ignore = true
 
 [[object]]
 name = "Gdk.Cursor"
@@ -220,6 +227,11 @@ status = "generate"
     [[object.property]]
     name = "type"
     generate = ["get", "notify"]
+
+[[object]]
+name = "Gdk.DevicePadFeature"
+status = "generate"
+version = "3.22"
 
 [[object]]
 name = "Gdk.Display"

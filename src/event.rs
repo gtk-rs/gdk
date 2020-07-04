@@ -350,7 +350,7 @@ impl Event {
     /// Tries to downcast to a specific event type.
     pub fn downcast_ref<T: FromEvent>(&self) -> Option<&T> {
         if T::is(self) {
-            unsafe { Some(mem::transmute::<&Event, &T>(self)) }
+            unsafe { Some(&*(self as *const _ as *const _)) }
         } else {
             None
         }
@@ -359,7 +359,7 @@ impl Event {
     /// Tries to downcast to a specific event type.
     pub fn downcast_mut<T: FromEvent>(&mut self) -> Option<&mut T> {
         if T::is(self) {
-            unsafe { Some(mem::transmute::<&mut Event, &mut T>(self)) }
+            unsafe { Some(&mut *(self as *mut _ as *mut _)) }
         } else {
             None
         }
@@ -412,8 +412,16 @@ macro_rules! event_wrapper {
 
         impl FromGlibPtrBorrow<*mut ::gdk_sys::$ffi_name> for $name {
             #[inline]
-            unsafe fn from_glib_borrow(ptr: *mut ::gdk_sys::$ffi_name) -> Self {
-                $name(from_glib_borrow(ptr as *mut ::gdk_sys::GdkEvent))
+            unsafe fn from_glib_borrow(
+                ptr: *mut ::gdk_sys::$ffi_name,
+            ) -> glib::translate::Borrowed<Self> {
+                glib::translate::Borrowed::new(
+                    <$name as ::event::FromEvent>::from(
+                        ::Event::from_glib_borrow(ptr as *mut ::gdk_sys::GdkEvent).into_inner(),
+                    )
+                    .map_err(std::mem::forget)
+                    .unwrap(),
+                )
             }
         }
 
@@ -485,5 +493,19 @@ macro_rules! event_subtype {
                 &mut self.0
             }
         }
+    }
+}
+
+impl FromEvent for Event {
+    #[inline]
+    fn is(_ev: &Event) -> bool {
+        skip_assert_initialized!();
+        true
+    }
+
+    #[inline]
+    fn from(ev: Event) -> Result<Self, Event> {
+        skip_assert_initialized!();
+        Ok(ev)
     }
 }

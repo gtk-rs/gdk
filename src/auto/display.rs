@@ -346,7 +346,9 @@ impl Display {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"closed\0".as_ptr() as *const _,
-                Some(transmute(closed_trampoline::<F> as usize)),
+                Some(transmute::<_, unsafe extern "C" fn()>(
+                    closed_trampoline::<F> as *const (),
+                )),
                 Box_::into_raw(f),
             )
         }
@@ -370,7 +372,9 @@ impl Display {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"monitor-added\0".as_ptr() as *const _,
-                Some(transmute(monitor_added_trampoline::<F> as usize)),
+                Some(transmute::<_, unsafe extern "C" fn()>(
+                    monitor_added_trampoline::<F> as *const (),
+                )),
                 Box_::into_raw(f),
             )
         }
@@ -394,7 +398,9 @@ impl Display {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"monitor-removed\0".as_ptr() as *const _,
-                Some(transmute(monitor_removed_trampoline::<F> as usize)),
+                Some(transmute::<_, unsafe extern "C" fn()>(
+                    monitor_removed_trampoline::<F> as *const (),
+                )),
                 Box_::into_raw(f),
             )
         }
@@ -413,7 +419,9 @@ impl Display {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"opened\0".as_ptr() as *const _,
-                Some(transmute(opened_trampoline::<F> as usize)),
+                Some(transmute::<_, unsafe extern "C" fn()>(
+                    opened_trampoline::<F> as *const (),
+                )),
                 Box_::into_raw(f),
             )
         }
@@ -434,7 +442,9 @@ impl Display {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"seat-added\0".as_ptr() as *const _,
-                Some(transmute(seat_added_trampoline::<F> as usize)),
+                Some(transmute::<_, unsafe extern "C" fn()>(
+                    seat_added_trampoline::<F> as *const (),
+                )),
                 Box_::into_raw(f),
             )
         }
@@ -455,7 +465,9 @@ impl Display {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"seat-removed\0".as_ptr() as *const _,
-                Some(transmute(seat_removed_trampoline::<F> as usize)),
+                Some(transmute::<_, unsafe extern "C" fn()>(
+                    seat_removed_trampoline::<F> as *const (),
+                )),
                 Box_::into_raw(f),
             )
         }
