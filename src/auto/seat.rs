@@ -143,7 +143,9 @@ impl Seat {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"device-added\0".as_ptr() as *const _,
-                Some(transmute(device_added_trampoline::<F> as usize)),
+                Some(transmute::<_, unsafe extern "C" fn()>(
+                    device_added_trampoline::<F> as *const (),
+                )),
                 Box_::into_raw(f),
             )
         }
@@ -164,7 +166,9 @@ impl Seat {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"device-removed\0".as_ptr() as *const _,
-                Some(transmute(device_removed_trampoline::<F> as usize)),
+                Some(transmute::<_, unsafe extern "C" fn()>(
+                    device_removed_trampoline::<F> as *const (),
+                )),
                 Box_::into_raw(f),
             )
         }
@@ -185,7 +189,9 @@ impl Seat {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"tool-added\0".as_ptr() as *const _,
-                Some(transmute(tool_added_trampoline::<F> as usize)),
+                Some(transmute::<_, unsafe extern "C" fn()>(
+                    tool_added_trampoline::<F> as *const (),
+                )),
                 Box_::into_raw(f),
             )
         }
@@ -209,7 +215,9 @@ impl Seat {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"tool-removed\0".as_ptr() as *const _,
-                Some(transmute(tool_removed_trampoline::<F> as usize)),
+                Some(transmute::<_, unsafe extern "C" fn()>(
+                    tool_removed_trampoline::<F> as *const (),
+                )),
                 Box_::into_raw(f),
             )
         }

@@ -143,7 +143,9 @@ impl Keymap {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"direction-changed\0".as_ptr() as *const _,
-                Some(transmute(direction_changed_trampoline::<F> as usize)),
+                Some(transmute::<_, unsafe extern "C" fn()>(
+                    direction_changed_trampoline::<F> as *const (),
+                )),
                 Box_::into_raw(f),
             )
         }
@@ -162,7 +164,9 @@ impl Keymap {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"keys-changed\0".as_ptr() as *const _,
-                Some(transmute(keys_changed_trampoline::<F> as usize)),
+                Some(transmute::<_, unsafe extern "C" fn()>(
+                    keys_changed_trampoline::<F> as *const (),
+                )),
                 Box_::into_raw(f),
             )
         }
@@ -181,7 +185,9 @@ impl Keymap {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"state-changed\0".as_ptr() as *const _,
-                Some(transmute(state_changed_trampoline::<F> as usize)),
+                Some(transmute::<_, unsafe extern "C" fn()>(
+                    state_changed_trampoline::<F> as *const (),
+                )),
                 Box_::into_raw(f),
             )
         }

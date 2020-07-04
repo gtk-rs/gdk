@@ -147,7 +147,9 @@ impl DragContext {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"action-changed\0".as_ptr() as *const _,
-                Some(transmute(action_changed_trampoline::<F> as usize)),
+                Some(transmute::<_, unsafe extern "C" fn()>(
+                    action_changed_trampoline::<F> as *const (),
+                )),
                 Box_::into_raw(f),
             )
         }
@@ -171,7 +173,9 @@ impl DragContext {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"cancel\0".as_ptr() as *const _,
-                Some(transmute(cancel_trampoline::<F> as usize)),
+                Some(transmute::<_, unsafe extern "C" fn()>(
+                    cancel_trampoline::<F> as *const (),
+                )),
                 Box_::into_raw(f),
             )
         }
@@ -191,7 +195,9 @@ impl DragContext {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"dnd-finished\0".as_ptr() as *const _,
-                Some(transmute(dnd_finished_trampoline::<F> as usize)),
+                Some(transmute::<_, unsafe extern "C" fn()>(
+                    dnd_finished_trampoline::<F> as *const (),
+                )),
                 Box_::into_raw(f),
             )
         }
@@ -215,7 +221,9 @@ impl DragContext {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"drop-performed\0".as_ptr() as *const _,
-                Some(transmute(drop_performed_trampoline::<F> as usize)),
+                Some(transmute::<_, unsafe extern "C" fn()>(
+                    drop_performed_trampoline::<F> as *const (),
+                )),
                 Box_::into_raw(f),
             )
         }

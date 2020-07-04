@@ -1837,14 +1837,21 @@ impl<O: IsA<Window>> WindowExt for O {
             P: IsA<Window>,
         {
             let f: &F = &*(f as *const F);
-            f(&Window::from_glib_borrow(this).unsafe_cast(), width, height).to_glib_full()
+            f(
+                &Window::from_glib_borrow(this).unsafe_cast_ref(),
+                width,
+                height,
+            )
+            .to_glib_full()
         }
         unsafe {
             let f: Box_<F> = Box_::new(f);
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"create-surface\0".as_ptr() as *const _,
-                Some(transmute(create_surface_trampoline::<Self, F> as usize)),
+                Some(transmute::<_, unsafe extern "C" fn()>(
+                    create_surface_trampoline::<Self, F> as *const (),
+                )),
                 Box_::into_raw(f),
             )
         }
@@ -1878,7 +1885,7 @@ impl<O: IsA<Window>> WindowExt for O {
             P: IsA<Window>,
         {
             let f: &F = &*(f as *const F);
-            f(&Window::from_glib_borrow(this).unsafe_cast(), x, y) /*Not checked*/
+            f(&Window::from_glib_borrow(this).unsafe_cast_ref(), x, y) /*Not checked*/
                 .to_glib_none()
                 .0
         }
@@ -1887,8 +1894,8 @@ impl<O: IsA<Window>> WindowExt for O {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"pick-embedded-child\0".as_ptr() as *const _,
-                Some(transmute(
-                    pick_embedded_child_trampoline::<Self, F> as usize,
+                Some(transmute::<_, unsafe extern "C" fn()>(
+                    pick_embedded_child_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
             )
@@ -1909,14 +1916,16 @@ impl<O: IsA<Window>> WindowExt for O {
             P: IsA<Window>,
         {
             let f: &F = &*(f as *const F);
-            f(&Window::from_glib_borrow(this).unsafe_cast())
+            f(&Window::from_glib_borrow(this).unsafe_cast_ref())
         }
         unsafe {
             let f: Box_<F> = Box_::new(f);
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::cursor\0".as_ptr() as *const _,
-                Some(transmute(notify_cursor_trampoline::<Self, F> as usize)),
+                Some(transmute::<_, unsafe extern "C" fn()>(
+                    notify_cursor_trampoline::<Self, F> as *const (),
+                )),
                 Box_::into_raw(f),
             )
         }
